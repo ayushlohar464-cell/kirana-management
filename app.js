@@ -3079,6 +3079,8 @@ function clearAllData() {
         suppliers = [];
         bills = [];
         sales = [];
+        customMasterItems = [];
+        supplierCatalog = {};
         saveData();
         populateSupplierDropdowns();
         renderDashboard();
@@ -3209,25 +3211,51 @@ function initFirebaseSync() {
 
 function handleCloudDataReceived(snapshot) {
     const cloudData = snapshot.val();
-    if (!cloudData) return;
+    if (!cloudData) {
+        suppliers = [];
+        bills = [];
+        sales = [];
+        customMasterItems = [];
+        supplierCatalog = {};
+        saveData();
+        populateSupplierDropdowns();
+        renderDashboard();
+        return;
+    }
     if (isSyncingToCloud) return;
 
     isApplyingCloudData = true;
 
-    if (Array.isArray(cloudData.suppliers)) suppliers = cloudData.suppliers;
-    else if (cloudData.suppliers && typeof cloudData.suppliers === "object") suppliers = Object.values(cloudData.suppliers);
+    // Handle empty arrays (Firebase Realtime Database omits empty arrays)
+    if (cloudData.suppliers) {
+        suppliers = Array.isArray(cloudData.suppliers) ? cloudData.suppliers : Object.values(cloudData.suppliers);
+    } else {
+        suppliers = [];
+    }
 
-    if (Array.isArray(cloudData.bills)) bills = cloudData.bills;
-    else if (cloudData.bills && typeof cloudData.bills === "object") bills = Object.values(cloudData.bills);
+    if (cloudData.bills) {
+        bills = Array.isArray(cloudData.bills) ? cloudData.bills : Object.values(cloudData.bills);
+    } else {
+        bills = [];
+    }
 
-    if (Array.isArray(cloudData.sales)) sales = cloudData.sales;
-    else if (cloudData.sales && typeof cloudData.sales === "object") sales = Object.values(cloudData.sales);
+    if (cloudData.sales) {
+        sales = Array.isArray(cloudData.sales) ? cloudData.sales : Object.values(cloudData.sales);
+    } else {
+        sales = [];
+    }
 
-    if (cloudData.supplierCatalog) supplierCatalog = cloudData.supplierCatalog;
+    if (cloudData.supplierCatalog) {
+        supplierCatalog = cloudData.supplierCatalog;
+    } else {
+        supplierCatalog = {};
+    }
 
-    if (Array.isArray(cloudData.customMasterItems)) customMasterItems = cloudData.customMasterItems;
-    else if (cloudData.customMasterItems && typeof cloudData.customMasterItems === "object") customMasterItems = Object.values(cloudData.customMasterItems);
-    localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
+    if (cloudData.customMasterItems) {
+        customMasterItems = Array.isArray(cloudData.customMasterItems) ? cloudData.customMasterItems : Object.values(cloudData.customMasterItems);
+    } else {
+        customMasterItems = [];
+    }
 
     const cloudUpdatedAt = cloudData.updatedAt || Date.now();
 
