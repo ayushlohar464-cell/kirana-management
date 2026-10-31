@@ -3149,13 +3149,20 @@ function updateCloudSyncUI() {
     }
 }
 
+const DEFAULT_FIREBASE_CONFIG = {
+    databaseURL: "https://poonam-kirana-default-rtdb.firebaseio.com",
+    projectId: "poonam-kirana"
+};
+
 function initFirebaseSync() {
-    updateCloudSyncUI();
-    const rawConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+    let rawConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+    // If no config saved on this device (e.g. mobile opening for first time), auto-configure the store database!
     if (!rawConfig) {
-        updateSyncBadge("disconnected", "क्लाउड सिंक बंद");
-        return;
+        rawConfig = JSON.stringify(DEFAULT_FIREBASE_CONFIG);
+        localStorage.setItem(FIREBASE_CONFIG_KEY, rawConfig);
     }
+
+    updateCloudSyncUI();
 
     if (typeof firebase === "undefined") {
         console.warn("Firebase SDK script not loaded yet");
@@ -3205,68 +3212,69 @@ function handleCloudDataReceived(snapshot) {
     if (!cloudData) return;
     if (isSyncingToCloud) return;
 
-    const localUpdatedAt = parseInt(localStorage.getItem(CLOUD_UPDATED_AT_KEY) || "0", 10);
-    const cloudUpdatedAt = cloudData.updatedAt || 0;
+    isApplyingCloudData = true;
 
-    // Apply cloud data if newer
-    if (cloudUpdatedAt > localUpdatedAt) {
-        isApplyingCloudData = true;
+    if (Array.isArray(cloudData.suppliers)) suppliers = cloudData.suppliers;
+    else if (cloudData.suppliers && typeof cloudData.suppliers === "object") suppliers = Object.values(cloudData.suppliers);
 
-        if (Array.isArray(cloudData.suppliers)) suppliers = cloudData.suppliers;
-        else if (cloudData.suppliers && typeof cloudData.suppliers === "object") suppliers = Object.values(cloudData.suppliers);
+    if (Array.isArray(cloudData.bills)) bills = cloudData.bills;
+    else if (cloudData.bills && typeof cloudData.bills === "object") bills = Object.values(cloudData.bills);
 
-        if (Array.isArray(cloudData.bills)) bills = cloudData.bills;
-        else if (cloudData.bills && typeof cloudData.bills === "object") bills = Object.values(cloudData.bills);
+    if (Array.isArray(cloudData.sales)) sales = cloudData.sales;
+    else if (cloudData.sales && typeof cloudData.sales === "object") sales = Object.values(cloudData.sales);
 
-        if (Array.isArray(cloudData.sales)) sales = cloudData.sales;
-        else if (cloudData.sales && typeof cloudData.sales === "object") sales = Object.values(cloudData.sales);
+    if (cloudData.supplierCatalog) supplierCatalog = cloudData.supplierCatalog;
 
-        if (cloudData.supplierCatalog) supplierCatalog = cloudData.supplierCatalog;
+    if (Array.isArray(cloudData.customMasterItems)) customMasterItems = cloudData.customMasterItems;
+    else if (cloudData.customMasterItems && typeof cloudData.customMasterItems === "object") customMasterItems = Object.values(cloudData.customMasterItems);
+    localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
 
-        if (Array.isArray(cloudData.customMasterItems)) customMasterItems = cloudData.customMasterItems;
-        else if (cloudData.customMasterItems && typeof cloudData.customMasterItems === "object") customMasterItems = Object.values(cloudData.customMasterItems);
-        localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
+    const cloudUpdatedAt = cloudData.updatedAt || Date.now();
 
-        // Clean redundant photos in bills if any
-        let cleaned = false;
-        const seenInvoicesWithPhoto = new Set();
-        bills.forEach(b => {
-            const key = b.invoiceId || `${b.billNumber}_${b.supplier}_${b.date}`;
-            if (b.photo) {
-                if (seenInvoicesWithPhoto.has(key)) {
-                    b.photo = null;
-                    cleaned = true;
-                } else {
-                    seenInvoicesWithPhoto.add(key);
-                }
+    // Clean redundant photos in bills if any
+    let cleaned = false;
+    const seenInvoicesWithPhoto = new Set();
+    bills.forEach(b => {
+        const key = b.invoiceId || `${b.billNumber}_${b.supplier}_${b.date}`;
+        if (b.photo) {
+            if (seenInvoicesWithPhoto.has(key)) {
+                b.photo = null;
+                cleaned = true;
+            } else {
+                seenInvoicesWithPhoto.add(key);
             }
-        });
+        }
+    });
 
-        // Save into local storage
-        localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(suppliers));
-        localStorage.setItem(BILLS_KEY, JSON.stringify(bills));
-        localStorage.setItem(SALES_KEY, JSON.stringify(sales));
-        localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
-        localStorage.setItem(CLOUD_UPDATED_AT_KEY, cloudUpdatedAt.toString());
+    // Save into local storage
+    localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(suppliers));
+    localStorage.setItem(BILLS_KEY, JSON.stringify(bills));
+    localStorage.setItem(SALES_KEY, JSON.stringify(sales));
+    localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
+    localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
+    localStorage.setItem(CLOUD_UPDATED_AT_KEY, cloudUpdatedAt.toString());
 
-        isApplyingCloudData = false;
+    isApplyingCloudData = false;
 
-        // Re-render UI components
+    // Re-render UI components safely
+    try {
         populateSupplierDropdowns();
         renderDashboard();
-        if (currentActiveSection === "bills") renderBills();
-        if (currentActiveSection === "suppliers") renderSuppliers();
-        if (currentActiveSection === "recordSale") renderSales();
-        if (currentActiveSection === "reports") updateReports();
-
-        const timeEl = document.getElementById("cloudLastSyncTime");
-        if (timeEl) {
-            timeEl.innerText = new Date(cloudUpdatedAt).toLocaleTimeString("mr-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-
-        updateSyncBadge("connected", "🟢 क्लाउड चालू");
-        showToast("⚡ नवीन बदल आपोआप सिंक झाले!");
+        if (currentActiveSection === "bills") renderBillsList();
+        if (currentActiveSection === "suppliers") renderSuppliersSection();
+        if (currentActiveSection === "recordSale") renderSalesList();
+        if (currentActiveSection === "reports") renderReports();
+        if (currentActiveSection === "itemsCatalog") renderMasterCatalogTable();
+    } catch (e) {
+        console.warn("Error re-rendering UI on cloud sync:", e);
     }
+
+    const timeEl = document.getElementById("cloudLastSyncTime");
+    if (timeEl) {
+        timeEl.innerText = new Date(cloudUpdatedAt).toLocaleTimeString("mr-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    updateSyncBadge("connected", "🟢 क्लाउड चालू");
 }
 
 function pushDataToCloud(force = false) {
