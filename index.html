@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏪 पूनम किराणा - सप्लायर बिल व नफा व्यवस्थापन</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js for 1 Year Monthly & Yearly Profit Report -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- ==================== LOGIN PAGE ==================== -->
+    <div id="loginPage" class="login-page">
+        <div class="login-container">
+            <div class="login-icon">🏪</div>
+            <h1>पूनम किराणा</h1>
+            <p class="login-subtitle">सप्लायर बिल, उलाढाल व १-वर्षीय नफा हिशोब</p>
+            <form id="loginForm" onsubmit="return handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">👤 युजरनेम</label>
+                    <input type="text" id="username" placeholder="युजरनेम टाका" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">🔒 पासवर्ड</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="पासवर्ड टाका" required autocomplete="current-password">
+                        <button type="button" class="toggle-pass" onclick="togglePassword()">👁️</button>
+                    </div>
+                </div>
+                <div id="loginError" class="error-msg" style="display:none;"></div>
+                <button type="submit" class="btn-login">लॉगिन करा 🔐</button>
+            </form>
+            <div class="login-footer">
+                <p>Default: <strong>admin</strong> / <strong>kirana123</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP ==================== -->
+    <div id="mainApp" class="main-app" style="display:none;">
+
+        <!-- NAVBAR -->
+        <header class="navbar">
+            <div class="nav-left">
+                <button id="navBackBtn" class="btn-nav-back" onclick="goBack()" style="display:none;">⬅ मागे</button>
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <h2>🏪 पूनम किराणा</h2>
+            </div>
+            <div class="nav-right">
+                <span class="user-badge" id="userBadge">👤 admin</span>
+                <button class="btn-logout" onclick="handleLogout()">बाहेर पडा 🚪</button>
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>🏪 पूनम किराणा</h3>
+                <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" onclick="showSection('dashboard')">📊 डॅशबोर्ड व आढावा</li>
+                <li onclick="showSection('suppliers')">👥 कायमचे सप्लायर्स (Excel रिपोर्ट)</li>
+                <li onclick="showSection('addBill')">➕ नवीन सप्लायर बिल नोंदवा</li>
+                <li onclick="showSection('recordSale')">🛒 विक्री नोंद (Daily Sales)</li>
+                <li onclick="showSection('bills')">📑 सप्लायर बिलांची यादी (फोटोसह)</li>
+                <li onclick="showSection('reports')">📈 वार्षिक व मासिक नफा रिपोर्ट</li>
+                <li class="menu-divider">सेक्शन-निहाय माल:</li>
+                <li onclick="showCategory('kirana')">🛒 किराणा विभाग</li>
+                <li onclick="showCategory('colddrinks')">🥤 कोल्ड ड्रिंक्स विभाग</li>
+                <li onclick="showCategory('snacks')">🍿 स्नॅक्स / बिस्किटे</li>
+                <li onclick="showCategory('dairy')">🥛 दूध व डेअरी</li>
+                <li onclick="showCategory('masala')">🌶️ मसाले</li>
+                <li onclick="showCategory('cleaning')">🧹 साफसफाई</li>
+                <li onclick="showCategory('personal')">🧴 पर्सनल केअर</li>
+                <li class="menu-divider">इतर:</li>
+                <li onclick="showSection('settings')">⚙️ सेटिंग्ज व बॅकअप</li>
+            </ul>
+        </nav>
+
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- CONTENT -->
+        <main class="content">
+
+            <!-- ==================== SECTION: DASHBOARD ==================== -->
+            <section id="sec-dashboard" class="section active-section">
+                <div class="section-header-row">
+                    <h2 class="section-title">📊 पूनम किराणा — Management</h2>
+                    <div class="quick-actions">
+                        <button class="btn-quick" onclick="showSection('suppliers')">👥 सप्लायर्स</button>
+                        <button class="btn-quick" onclick="showSection('addBill')">➕ बिल नोंदवा</button>
+                        <button class="btn-quick btn-green" onclick="showSection('recordSale')">🛒 विक्री नोंदवा</button>
+                    </div>
+                </div>
+
+                <!-- 4 MAIN STAT CARDS -->
+                <div class="stats-grid">
+                    <div class="stat-card stat-purchase">
+                        <div class="stat-icon">📥</div>
+                        <div class="stat-info">
+                            <span class="stat-label">एकूण खरेदी (Purchase Cost)</span>
+                            <span class="stat-value" id="dashTotalPurchase">₹0</span>
+                            <small class="stat-sub" id="dashTotalBills">0 बिले</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-turnover">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <span class="stat-label">एकूण विक्री / उलाढाल (Turnover)</span>
+                            <span class="stat-value" id="dashTotalSales">₹0</span>
+                            <small class="stat-sub" id="dashSalesCount">0 नोंदी</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-profit">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <span class="stat-label">झालेला निव्वळ नफा (Profit)</span>
+                            <span class="stat-value" id="dashTotalProfit">₹0</span>
+                            <small class="stat-sub" id="dashNetMargin">0% मार्जिन</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-potential">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <span class="stat-label">नोंदवलेले कायमचे सप्लायर्स</span>
+                            <span class="stat-value" id="dashSuppliersCount">0 सप्लायर्स</span>
+                            <small class="stat-sub">नियमित पुरवठादार</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION-WISE PROFIT & TURNOVER TABLE -->
+                <h3 class="sub-title">📁 सेक्शन-निहाय खरेदी, विक्री आणि नफा (Kirana vs Colddrinks)</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>सेक्शन (विभाग)</th>
+                                <th>एकूण बॉक्स/नग</th>
+                                <th>विकत घेतलेली किंमत (खरेदी)</th>
+                                <th>झालेली विक्री (उलाढाल)</th>
+                                <th>झालेला नफा (Profit)</th>
+                                <th>मार्जिन %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashSectionSummaryBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- RECENT BILLS PREVIEW -->
+                <div class="flex-between" style="margin-top:24px;">
+                    <h3 class="sub-title" style="margin:0;">📑 नुकतीच जोडलेली सप्लायर बिले</h3>
+                    <button class="btn-link" onclick="showSection('bills')">सर्व बिले पहा →</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>तारीख</th>
+                                <th>सप्लायर</th>
+                                <th>बिल नं.</th>
+                                <th>सेक्शन</th>
+                                <th>माल नाव</th>
+                                <th>बॉक्स / नग</th>
+                                <th>खरेदी किंमत</th>
+                                <th>विक्रीवर होणार</th>
+                                <th>अपेक्षित नफा</th>
+                                <th>बिल फोटो</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashRecentBillsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION: PERMANENT SUPPLIERS ==================== -->
+            <section id="sec-suppliers" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title">👥 कायमचे सप्लायर्स व Excel रिपोर्ट</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="btn-quick btn-green" onclick="downloadAllSuppliersReportExcel()">📊 सर्व सप्लायर्स Excel रिपोर्ट 📥</button>
+                        <button class="btn-quick" onclick="openAddSupplierModal()">➕ नवीन सप्लायर जोडा</button>
+                    </div>
+                </div>
+                <p class="section-desc">प्रत्येक सप्लायरच्या कार्डवर <strong>'📊 Excel शीट'</strong> आणि <strong>'📄 CSV'</strong> दोन्ही पर्याय दिले आहेत. यातून <strong>व्यवस्थित बॉर्डर्स, फॉन्ट आणि रकाने असलेला सुंदर Excel रिपोर्ट</strong> डाऊनलोड होईल:</p>
+
+                <!-- SUPPLIERS GRID / CARDS -->
+                <div class="suppliers-grid" id="suppliersGrid"></div>
+
+                <!-- SUPPLIER WISE PURCHASES TABLE -->
+                <h3 class="sub-title" style="margin-top:28px;">📊 सप्लायर-निहाय खरेदी व Excel रिपोर्ट ताळेबंद</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>सप्लायर नाव</th>
+                                <th>मुख्य सेक्शन</th>
+                                <th>मोबाईल नंबर</th>
+                                <th>एकूण बिले संख्या</th>
+                                <th>एकूण खरेदी रक्कम (₹)</th>
+                                <th>विक्रीवर होणार रक्कम (₹)</th>
+                                <th>अपेक्षित नफा (₹)</th>
+                                <th>Excel / CSV डाउनलोड</th>
+                                <th>कृती</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION: ADD SUPPLIER BILL ==================== -->
+            <section id="sec-addBill" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title">➕ सप्लायर बिल नोंदवा (४० ते ५० माल एकाच बिलात एकदम जोडा)</h2>
+                    </div>
+                </div>
+                <p class="section-desc">सप्लायर निवडा, <strong>"📋 या सप्लायरचा मागील माल लोड करा"</strong> दाबा किंवा एकाच बिलात जे जे माल आहेत ते ओळींमध्ये भरा आणि <strong>संपूर्ण बिल एकाच वेळी सेव्ह करा</strong>:</p>
+
+                <form id="bulkBillForm" class="bill-form" onsubmit="return handleSaveBulkBill(event)">
+                    <!-- MASTER INVOICE HEADER -->
+                    <div class="form-row three-col">
+                        <div class="form-group">
+                            <label>📅 बिल तारीख (Invoice Date)</label>
+                            <input type="date" id="billDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                🏢 सप्लायर निवडा (Select Supplier)
+                                <a href="javascript:void(0)" onclick="openAddSupplierModal()" style="font-size:12px; float:right; color:#1e88e5; text-decoration:none;">+ नवीन सप्लायर</a>
+                            </label>
+                            <select id="billSupplierSelect" required onchange="onSupplierSelected()">
+                                <option value="">-- सप्लायर निवडा --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>🧾 सप्लायर बिल क्रमांक (Bill / Invoice No.)</label>
+                            <input type="text" id="billNumber" placeholder="उदा. INV-2026-912" required>
+                        </div>
+                    </div>
+
+                    <!-- BILL PHOTO UPLOAD SECTION (1 photo for all 40-50 items) -->
+                    <div class="photo-upload-container">
+                        <label class="photo-upload-label">📷 सप्लायर बिलाचा मूळ फोटो जोडा (Bill Photo Upload):</label>
+                        <div class="photo-upload-box">
+                            <input type="file" id="billPhotoInput" accept="image/*" capture="environment" onchange="handleBillPhotoSelect(event)" style="display:none;">
+                            <button type="button" class="btn-upload-trigger" onclick="document.getElementById('billPhotoInput').click()">
+                                📸 बिलाचा फोटो काढा किंवा गॅलरीतून निवडा
+                            </button>
+                            <span class="photo-hint">(संपूर्ण ४०-५० मालाच्या मूळ बिलाचा फोटो एकदाच जोडा, तो सर्व आयटम्ससोबत कायम सेव्ह राहील)</span>
+                        </div>
+                        <!-- Preview of chosen image -->
+                        <div id="billPhotoPreviewContainer" class="photo-preview-wrapper" style="display:none;">
+                            <img id="billPhotoPreviewImg" src="" alt="Bill Preview" class="photo-preview-thumbnail" onclick="viewCurrentPhotoModal()">
+                            <div class="photo-preview-actions">
+                                <span class="photo-success-tag">✅ बिलाचा फोटो जोडला गेला</span>
+                                <button type="button" class="btn-sm btn-delete" onclick="removeBillPhotoPreview()">❌ फोटो हटवा</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QUICK ACTION TOOLBAR FOR 40-50 ITEMS -->
+                    <div class="items-toolbar">
+                        <div class="items-toolbar-left">
+                            <button type="button" id="btnLoadSupplierItems" class="btn-quick btn-green btn-pulse" onclick="loadSupplierItems()">
+                                📋 या सप्लायरचे मागील माल/आयटम्स लोड करा ⚡
+                            </button>
+                            <button type="button" class="btn-quick" onclick="addBillItemRow()">
+                                ➕ १ माल जोडा
+                            </button>
+                            <button type="button" class="btn-quick btn-sky" onclick="addMultipleBlankRows(5)">
+                                ⚡ +५ ओळी वाढवा
+                            </button>
+                            <button type="button" class="btn-quick btn-purple" onclick="addMultipleBlankRows(10)">
+                                ⚡ +१० ओळी वाढवा
+                            </button>
+                        </div>
+                        <div class="items-toolbar-right">
+                            <button type="button" class="btn-sm btn-delete" onclick="clearBillItemRows()">
+                                🧹 सर्व ओळी साफ करा
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DATALIST FOR AUTOCOMPLETE -->
+                    <datalist id="supplierItemsDatalist"></datalist>
+
+                    <!-- DYNAMIC ITEMS TABLE -->
+                    <div class="table-wrapper items-table-wrapper">
+                        <table class="data-table items-entry-table" id="billItemsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px; text-align:center;">#</th>
+                                    <th style="min-width:210px;">📦 मालाचे नाव (Item Name)</th>
+                                    <th style="min-width:145px;">📂 विभाग (Section)</th>
+                                    <th style="min-width:95px;">📏 एकक (Unit)</th>
+                                    <th style="width:90px; text-align:right;">संख्या/बॉक्स</th>
+                                    <th style="width:110px; text-align:right;">खरेदी दर (₹)</th>
+                                    <th style="width:120px; text-align:right;">एकूण खरेदी (₹)</th>
+                                    <th style="width:110px; text-align:right;">विक्री दर (₹)</th>
+                                    <th style="width:120px; text-align:right;">विक्रीवर होणार (₹)</th>
+                                    <th style="width:110px; text-align:right;">नफा (₹)</th>
+                                    <th style="width:50px; text-align:center;">कृती</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billItemsTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- LIVE GRAND CALCULATION BOX -->
+                    <div class="calculation-card grand-calculation-card">
+                        <div class="calc-box">
+                            <span class="calc-label">एकूण आयटम्स (मालाचे प्रकार):</span>
+                            <span class="calc-amount" id="bulkTotalItemsCount" style="color:#0f172a;">0 माल</span>
+                        </div>
+                        <div class="calc-box">
+                            <span class="calc-label">एकूण खरेदी बिल (खर्च):</span>
+                            <span class="calc-amount red" id="bulkGrandCost">₹0.00</span>
+                        </div>
+                        <div class="calc-box">
+                            <span class="calc-label">विक्रीवर एकूण होणार (Expected Turnover):</span>
+                            <span class="calc-amount blue" id="bulkGrandExpected">₹0.00</span>
+                        </div>
+                        <div class="calc-box">
+                            <span class="calc-label">या बिलावर एकूण निव्वळ नफा (Profit):</span>
+                            <span class="calc-amount green" id="bulkGrandProfit">₹0.00</span>
+                            <span class="margin-pill margin-high" id="bulkGrandMargin" style="margin-left:8px;">0% नफा</span>
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT ACTIONS -->
+                    <div class="form-row two-col" style="margin-top:10px;">
+                        <button type="submit" class="btn-add btn-green" style="font-size:16px; padding:14px;">
+                            💾 हे संपूर्ण बिल एकदम सेव्ह करा (Save Complete Bill)
+                        </button>
+                        <button type="button" class="btn-danger" onclick="goBack()" style="padding:14px;">
+                            ⬅ मागे जा (रद्द करा)
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- ==================== SECTION: RECORD DAILY SALE ==================== -->
+            <section id="sec-recordSale" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title">🛒 दररोजची विक्री नोंदवा (Daily Sales Entry)</h2>
+                    </div>
+                </div>
+                <p class="section-desc">दिवसाच्या किंवा महिन्याच्या विक्रीची नोंद करा, ज्यामुळे १ वर्षाचा नफा अचूक काढता येईल:</p>
+
+                <form id="saleForm" class="bill-form" onsubmit="return handleRecordSale(event)">
+                    <div class="form-row three-col">
+                        <div class="form-group">
+                            <label>📅 विक्री तारीख (Date)</label>
+                            <input type="date" id="saleDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>📂 सेक्शन (विभाग)</label>
+                            <select id="saleSection" required>
+                                <option value="kirana">🛒 किराणा विभाग</option>
+                                <option value="colddrinks">🥤 कोल्ड ड्रिंक्स विभाग</option>
+                                <option value="snacks">🍿 स्नॅक्स / बिस्किटे</option>
+                                <option value="dairy">🥛 दूध व डेअरी</option>
+                                <option value="masala">🌶️ मसाले</option>
+                                <option value="cleaning">🧹 साफसफाई</option>
+                                <option value="personal">🧴 पर्सनल केअर</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>📝 तपशील / मालाचे नाव (ऐच्छिक)</label>
+                            <input type="text" id="saleNote" placeholder="उदा. आजची कोल्ड्रिंक्स विक्री किंवा साखर/डाळ">
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label>📥 त्या मालाची खरेदी किंमत (Cost Price ₹)</label>
+                            <input type="number" id="saleCostPrice" placeholder="उदा. 4000" min="0" step="0.01" required oninput="calculateSaleLive()">
+                            <small class="helper-text">विकलेल्या मालाची मूळ खरेदी किंमत</small>
+                        </div>
+                        <div class="form-group">
+                            <label>💰 प्रत्यक्ष झालेली विक्री रक्कम (Selling Price ₹)</label>
+                            <input type="number" id="saleAmount" placeholder="उदा. 5200" min="0" step="0.01" required oninput="calculateSaleLive()">
+                            <small class="helper-text">गल्ल्यात आलेली प्रत्यक्ष रक्कम (Turnover)</small>
+                        </div>
+                    </div>
+
+                    <div class="calculation-card" style="margin-bottom:16px;">
+                        <div class="calc-box">
+                            <span class="calc-label">झालेला नफा (Profit):</span>
+                            <span class="calc-amount green" id="saleLiveProfit">₹0.00</span>
+                            <span class="margin-pill margin-high" id="saleLiveMargin" style="margin-left:8px;">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <button type="submit" class="btn-add btn-green">🛒 विक्री नोंद सेव्ह करा</button>
+                        <button type="button" class="btn-danger" onclick="goBack()">⬅ मागे जा</button>
+                    </div>
+                </form>
+
+                <h3 class="sub-title" style="margin-top:24px;">📋 अलीकडील विक्री नोंदी</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>तारीख</th>
+                                <th>सेक्शन</th>
+                                <th>तपशील</th>
+                                <th>खरेदी किंमत</th>
+                                <th>झालेली विक्री (Turnover)</th>
+                                <th>झालेला नफा</th>
+                                <th>मार्जिन %</th>
+                                <th>कृती</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION: ALL BILLS LIST ==================== -->
+            <section id="sec-bills" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title">📑 सप्लायर खरेदी बिले (फोटो व ४०-५० माल तपशील)</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="btn-quick btn-green" onclick="downloadBillsExcel()">📊 सर्व बिलांचा Excel रिपोर्ट 📥</button>
+                        <button class="btn-quick" onclick="downloadBillsCSV()" style="background:#475569;">📄 CSV रिपोर्ट</button>
+                        <button class="btn-add" style="width:auto; padding:8px 16px;" onclick="showSection('addBill')">➕ नवीन बिल नोंदवा</button>
+                    </div>
+                </div>
+
+                <!-- VIEW TOGGLE TABS (Invoices vs Line items) -->
+                <div class="bills-view-toggle-bar">
+                    <button id="viewToggleInvoices" class="btn-view-toggle active" onclick="setBillsViewMode('invoices')">
+                        📑 बिलांनुसार एकत्रित यादी (Invoices) [४०-५० माल एकाच बिलात]
+                    </button>
+                    <button id="viewToggleItems" class="btn-view-toggle" onclick="setBillsViewMode('items')">
+                        📋 सर्व सुट्टे आयटम्स यादी (All Items Line-by-Line)
+                    </button>
+                </div>
+
+                <div class="search-filter-bar">
+                    <input type="text" id="billSearchInput" placeholder="🔍 सप्लायर, माल किंवा बिल नंबर शोधा..." oninput="renderBillsList()">
+                    <select id="billSupplierFilter" onchange="renderBillsList()">
+                        <option value="all">सर्व सप्लायर्स</option>
+                    </select>
+                    <select id="billSectionFilter" onchange="renderBillsList()">
+                        <option value="all">सर्व सेक्शन</option>
+                        <option value="kirana">🛒 किराणा</option>
+                        <option value="colddrinks">🥤 कोल्ड ड्रिंक्स</option>
+                        <option value="snacks">🍿 स्नॅक्स</option>
+                        <option value="dairy">🥛 दूध/डेअरी</option>
+                        <option value="masala">🌶️ मसाले</option>
+                        <option value="cleaning">🧹 साफसफाई</option>
+                        <option value="personal">🧴 पर्सनल केअर</option>
+                    </select>
+                </div>
+
+                <!-- TABLE 1: INVOICES VIEW (GROUPED) -->
+                <div id="invoicesViewWrapper" class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>बिल तारीख</th>
+                                <th>सप्लायरचे नाव</th>
+                                <th>बिल क्रमांक</th>
+                                <th>एकूण माल संख्या</th>
+                                <th>विभाग</th>
+                                <th>एकूण खरेदी बिल (₹)</th>
+                                <th>विक्रीवर होणार (₹)</th>
+                                <th>एकूण नफा (₹)</th>
+                                <th>📷 बिल फोटो</th>
+                                <th>कृती</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- TABLE 2: LINE-BY-LINE ITEMS VIEW -->
+                <div id="itemsViewWrapper" class="table-wrapper" style="display:none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>तारीख</th>
+                                <th>सप्लायर</th>
+                                <th>बिल नं.</th>
+                                <th>विभाग</th>
+                                <th>माल नाव</th>
+                                <th>बॉक्स / नग</th>
+                                <th>दर (खरेदी)</th>
+                                <th>एकूण खरेदी बिल</th>
+                                <th>दर (विक्री)</th>
+                                <th>विक्रीवर होणार</th>
+                                <th>नफा</th>
+                                <th>📷 बिल फोटो</th>
+                                <th>कृती</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBillsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION: 1-YEAR & MONTHLY REPORTS ==================== -->
+            <section id="sec-reports" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title">📈 १ वर्षाचा नफा आणि उलाढाल रिपोर्ट</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="btn-quick btn-green" onclick="downloadYearlyReportExcel()">📊 १ वर्षाचा ताळेबंद Excel 📥</button>
+                        <button class="btn-quick" onclick="downloadYearlyReportCSV()" style="background:#475569;">📄 CSV</button>
+                    </div>
+                </div>
+                <p class="section-desc">१ वर्षभरात किती माल विकला गेला, उलाढाल किती झाली आणि निव्वळ नफा किती शिल्लक राहिला याचा संपूर्ण हिशोब:</p>
+
+                <!-- YEAR SELECTOR -->
+                <div class="filter-card">
+                    <div class="form-group" style="margin:0; min-width:220px;">
+                        <label>📅 वर्ष निवडा (Select Financial Year):</label>
+                        <select id="reportYearSelect" onchange="renderReports()">
+                            <option value="2026" selected>2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                    <div class="report-annual-summary" id="annualSummaryBanner"></div>
+                </div>
+
+                <!-- MONTHLY BAR CHART -->
+                <div class="chart-card">
+                    <h3>📊 महिना-निहाय उलाढाल (Turnover) आणि नफा (Profit) आलेख</h3>
+                    <div style="height:320px; position:relative;">
+                        <canvas id="yearlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 12 MONTH BREAKDOWN TABLE -->
+                <h3 class="sub-title">📅 १२ महिन्यांचा संपूर्ण तपशीलवार ताळेबंद</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>महिना</th>
+                                <th>एकूण खरेदी (₹)</th>
+                                <th>झालेली विक्री / Turnover (₹)</th>
+                                <th>निव्वळ नफा (Profit ₹)</th>
+                                <th>नफा मार्जिन %</th>
+                                <th>स्थिती</th>
+                            </tr>
+                        </thead>
+                        <tbody id="yearlyTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION: CATEGORY DETAIL ==================== -->
+            <section id="sec-categoryView" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title" id="catViewTitle">सेक्शन माल तपशील</h2>
+                    </div>
+                    <button class="btn-quick" onclick="showSection('addBill')">➕ या सेक्शनमध्ये बिल नोंदवा</button>
+                </div>
+                <div class="stats-grid" style="margin-bottom:16px;">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <span class="stat-label">एकूण बॉक्स / नग</span>
+                            <span class="stat-value" id="catTotalQty">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📥</div>
+                        <div class="stat-info">
+                            <span class="stat-label">एकूण खरेदी खर्च</span>
+                            <span class="stat-value" id="catTotalBuy">₹0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <span class="stat-label">विक्रीवर होणार रक्कम</span>
+                            <span class="stat-value" id="catTotalSell">₹0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <span class="stat-label">अपेक्षित नफा</span>
+                            <span class="stat-value" id="catTotalProfit">₹0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>तारीख</th>
+                                <th>सप्लायर</th>
+                                <th>बिल नं.</th>
+                                <th>माल नाव</th>
+                                <th>बॉक्स / नग</th>
+                                <th>विकत घेतलेली किंमत</th>
+                                <th>विक्रीवर होणार</th>
+                                <th>नफा</th>
+                                <th>मार्जिन %</th>
+                                <th>फोटो</th>
+                                <th>कृती</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catViewTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION: SETTINGS ==================== -->
+            <section id="sec-settings" class="section">
+                <div class="section-header-row">
+                    <div class="title-with-back">
+                        <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
+                        <h2 class="section-title">⚙️ सेटिंग्ज व सुरक्षितता</h2>
+                    </div>
+                </div>
+                <div class="settings-card">
+                    <h3>🔑 लॉगिन पासवर्ड बदला</h3>
+                    <form onsubmit="return changePassword(event)">
+                        <div class="form-group">
+                            <label>सध्याचा जुना पासवर्ड</label>
+                            <input type="password" id="oldPass" required>
+                        </div>
+                        <div class="form-group">
+                            <label>नवीन पासवर्ड</label>
+                            <input type="password" id="newPass" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>नवीन पासवर्ड पुन्हा टाका</label>
+                            <input type="password" id="confirmPass" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn-add">पासवर्ड अपडेट करा 🔄</button>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3>💾 डेटा बॅकअप (Backup & Restore)</h3>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:12px;">सर्व कायमचे सप्लायर्स, बिले, फोटो, खरेदी आणि विक्री डेटा सुरक्षित डाऊनलोड करून ठेवा:</p>
+                    <button class="btn-add" onclick="exportData()" style="margin-bottom:10px;">डेटा बॅकअप फाईल डाऊनलोड करा (JSON) 📥</button>
+                    <br>
+                    <label class="btn-add" style="cursor:pointer; display:inline-block; text-align:center;">
+                        बॅकअप फाईल परत लोड करा (JSON Import) 📤
+                        <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+                    </label>
+                </div>
+
+                <div class="settings-card">
+                    <h3>🗑️ सर्व डेटा रीसेट करा</h3>
+                    <p style="font-size:13px; color:#dc2626; margin-bottom:12px;">⚠️ यामुळे सर्व सप्लायर्स, बिले आणि विक्री नोंदी कायमच्या हटवल्या जातील!</p>
+                    <button class="btn-danger" onclick="clearAllData()">सर्व डेटा हटवा 🗑️</button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODAL: ADD / EDIT SUPPLIER ==================== -->
+    <div id="supplierModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3 id="supplierModalTitle">➕ नवीन कायमचा सप्लायर जोडा</h3>
+            <form id="supplierForm" onsubmit="return handleSaveSupplier(event)">
+                <input type="hidden" id="supplierEditId">
+                <div class="form-group">
+                    <label>🏢 सप्लायरचे / एजन्सीचे नाव</label>
+                    <input type="text" id="suppName" placeholder="उदा. बालाजी डिस्ट्रीब्युटर्स / कोका कोला एजन्सी" required>
+                </div>
+                <div class="form-group">
+                    <label>📂 मुख्य सेक्शन (हा सप्लायर कोणत्या मालाचा आहे?)</label>
+                    <select id="suppSection" required>
+                        <option value="kirana">🛒 किराणा (डाळी, तेल, साखर)</option>
+                        <option value="colddrinks">🥤 कोल्ड ड्रिंक्स</option>
+                        <option value="snacks">🍿 स्नॅक्स / बिस्किटे</option>
+                        <option value="dairy">🥛 दूध व डेअरी</option>
+                        <option value="masala">🌶️ मसाले</option>
+                        <option value="cleaning">🧹 साफसफाई</option>
+                        <option value="personal">🧴 पर्सनल केअर</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📱 मोबाईल नंबर (ऐच्छिक)</label>
+                    <input type="tel" id="suppPhone" placeholder="उदा. 9822012345">
+                </div>
+                <div class="form-group">
+                    <label>📍 पत्ता / मार्केट यार्ड / जागा (ऐच्छिक)</label>
+                    <input type="text" id="suppAddress" placeholder="उदा. गाळा नं. 45, कृषी उत्पन्न बाजार समिती, मार्केट यार्ड">
+                </div>
+                <div class="form-row two-col" style="margin-top:16px;">
+                    <button type="submit" class="btn-add">सप्लायर सेव्ह करा 💾</button>
+                    <button type="button" class="btn-danger" onclick="closeSupplierModal()">रद्द करा ❌</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: VIEW BILL PHOTO FULLSCREEN ==================== -->
+    <div id="photoModal" class="modal" style="display:none;" onclick="if(event.target === this) closePhotoModal()">
+        <div class="modal-content photo-modal-content">
+            <div class="photo-modal-header">
+                <h3 id="photoModalTitle">🖼️ सप्लायर बिलाचा फोटो</h3>
+                <button class="close-sidebar" onclick="closePhotoModal()">✕</button>
+            </div>
+            <div class="photo-modal-body">
+                <img id="photoModalImg" src="" alt="Bill Photo">
+            </div>
+            <div class="photo-modal-footer">
+                <span id="photoModalDetails" class="photo-meta-text"></span>
+                <div style="display:flex; gap:10px;">
+                    <a id="photoDownloadBtn" href="#" download="bill_photo.jpg" class="btn-quick btn-green" style="text-decoration:none;">📥 फोटो डाऊनलोड करा</a>
+                    <button class="btn-danger" onclick="closePhotoModal()">बंद करा ✕</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: INVOICE DETAILS (४०-५० माल तपशील पहा) ==================== -->
+    <div id="invoiceDetailsModal" class="modal" style="display:none;" onclick="if(event.target === this) closeInvoiceModal()">
+        <div class="modal-content invoice-details-modal-content">
+            <div class="modal-header-with-actions">
+                <div>
+                    <h3 id="invoiceModalTitle" style="margin:0; font-size:18px; color:#1e3a8a;">📑 बिलाचा संपूर्ण तपशील</h3>
+                    <p id="invoiceModalSubtitle" style="margin:4px 0 0 0; font-size:13px; color:#64748b;"></p>
+                </div>
+                <button class="close-sidebar" onclick="closeInvoiceModal()">✕</button>
+            </div>
+
+            <!-- INVOICE STATS BANNER -->
+            <div id="invoiceModalBanner" class="calculation-card" style="margin:12px 0;"></div>
+
+            <!-- INVOICE ITEMS TABLE -->
+            <div class="table-wrapper" style="max-height:48vh; overflow-y:auto; margin-bottom:14px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width:35px; text-align:center;">#</th>
+                            <th>मालाचे नाव</th>
+                            <th>विभाग</th>
+                            <th style="text-align:center;">संख्या</th>
+                            <th style="text-align:right;">खरेदी दर (₹)</th>
+                            <th style="text-align:right;">खरेदी एकूण (₹)</th>
+                            <th style="text-align:right;">विक्री दर (₹)</th>
+                            <th style="text-align:right;">विक्रीवर होणार (₹)</th>
+                            <th style="text-align:right;">नफा (₹)</th>
+                            <th style="text-align:center;">मार्जिन %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceModalItemsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="photo-modal-footer" style="margin-top:8px;">
+                <div id="invoiceModalPhotoBtn"></div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button id="invoiceModalExcelBtn" class="btn-quick btn-green" onclick="">📊 हे बिल Excel मध्ये डाऊनलोड करा 📥</button>
+                    <button class="btn-danger" onclick="closeInvoiceModal()">बंद करा ✕</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
