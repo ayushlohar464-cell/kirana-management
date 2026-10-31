@@ -372,6 +372,15 @@ const CATALOG_KEY = "kirana_supplier_catalog_v2";
 const AUTH_KEY = "kirana_auth_status_v2";
 const USER_CRED_KEY = "kirana_user_credentials_v2";
 
+// ==================== CLOUD SYNC STATE (FIREBASE REALTIME DATABASE) ====================
+const FIREBASE_CONFIG_KEY = "kirana_firebase_config_v1";
+const CLOUD_UPDATED_AT_KEY = "kirana_cloud_updated_at_v1";
+
+let firebaseDb = null;
+let isSyncingToCloud = false;
+let isApplyingCloudData = false;
+let cloudListenerRef = null;
+
 function initCredentials() {
     if (!localStorage.getItem(USER_CRED_KEY)) {
         localStorage.setItem(USER_CRED_KEY, JSON.stringify({
@@ -423,6 +432,9 @@ function saveData() {
     }
     localStorage.setItem(SALES_KEY, JSON.stringify(sales));
     localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
+
+    // ⚡ Realtime Push to Firebase Cloud (Sync Mobile & Laptop)
+    pushDataToCloud();
 }
 
 // ==================== AUTHENTICATION ====================
@@ -2969,9 +2981,345 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
+// ==================== REALTIME CLOUD SYNC ENGINE (FIREBASE) ====================
+
+function updateSyncBadge(status, text) {
+    const badge = document.getElementById("cloudSyncBadge");
+    const label = document.getElementById("cloudSyncText");
+    const pill = document.getElementById("cloudStatusPill");
+    const detail = document.getElementById("cloudStatusDetail");
+
+    if (badge) {
+        badge.className = `cloud-sync-badge sync-${status}`;
+    }
+    if (label) {
+        label.innerText = text;
+    }
+    if (pill) {
+        if (status === "connected") {
+            pill.className = "cloud-status-pill pill-connected";
+            pill.innerText = "🟢 क्लाउड सिंक चालू (मोबाईल व लॅपटॉप कनेक्टेड)";
+        } else if (status === "syncing") {
+            pill.className = "cloud-status-pill pill-connected";
+            pill.innerText = "🔄 सिंक होत आहे...";
+        } else {
+            pill.className = "cloud-status-pill pill-disconnected";
+            pill.innerText = "⚪ सिंक बंद (स्थानिक ऑफलाइन मोड)";
+        }
+    }
+    if (detail) {
+        if (status === "connected") {
+            detail.innerHTML = '<span style="color:#16a34a;">🟢 लाईव्ह कनेक्टेड (Live Realtime Sync)</span>';
+        } else if (status === "syncing") {
+            detail.innerHTML = '<span style="color:#2563eb;">🔄 बदल सिंक होत आहेत...</span>';
+        } else if (status === "error") {
+            detail.innerHTML = '<span style="color:#dc2626;">⚠️ कनेक्शन अडचण (ऑफलाइन मोड)</span>';
+        } else {
+            detail.innerHTML = '<span style="color:#64748b;">⚪ बंद</span>';
+        }
+    }
+}
+
+function updateCloudSyncUI() {
+    const rawConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+    const activeBox = document.getElementById("cloudActiveInfo");
+    const setupBox = document.getElementById("cloudSetupForm");
+
+    if (rawConfig) {
+        if (activeBox) activeBox.style.display = "block";
+        if (setupBox) setupBox.style.display = "none";
+    } else {
+        if (activeBox) activeBox.style.display = "none";
+        if (setupBox) setupBox.style.display = "block";
+        updateSyncBadge("disconnected", "क्लाउड सिंक बंद");
+    }
+}
+
+function initFirebaseSync() {
+    updateCloudSyncUI();
+    const rawConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+    if (!rawConfig) {
+        updateSyncBadge("disconnected", "क्लाउड सिंक बंद");
+        return;
+    }
+
+    if (typeof firebase === "undefined") {
+        console.warn("Firebase SDK script not loaded yet");
+        updateSyncBadge("error", "⚠️ SDK लोड नाही");
+        return;
+    }
+
+    try {
+        const config = JSON.parse(rawConfig);
+        if (!firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
+        firebaseDb = firebase.database();
+        updateSyncBadge("connected", "🟢 क्लाउड चालू");
+
+        // Realtime Listener
+        if (cloudListenerRef) {
+            cloudListenerRef.off();
+        }
+        cloudListenerRef = firebaseDb.ref("poonam_kirana");
+        cloudListenerRef.on("value", handleCloudDataReceived, (err) => {
+            console.error("Firebase listen error:", err);
+            updateSyncBadge("error", "⚠️ कनेक्शन त्रुटी");
+        });
+
+        // Set last sync time if available
+        const lastSync = localStorage.getItem(CLOUD_UPDATED_AT_KEY);
+        if (lastSync) {
+            const timeEl = document.getElementById("cloudLastSyncTime");
+            if (timeEl) {
+                timeEl.innerText = new Date(parseInt(lastSync, 10)).toLocaleTimeString("mr-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+        }
+    } catch (err) {
+        console.error("Firebase initialization failed:", err);
+        updateSyncBadge("error", "⚠️ इनिट त्रुटी");
+    }
+}
+
+function handleCloudDataReceived(snapshot) {
+    const cloudData = snapshot.val();
+    if (!cloudData) return;
+    if (isSyncingToCloud) return;
+
+    const localUpdatedAt = parseInt(localStorage.getItem(CLOUD_UPDATED_AT_KEY) || "0", 10);
+    const cloudUpdatedAt = cloudData.updatedAt || 0;
+
+    // Apply cloud data if newer
+    if (cloudUpdatedAt > localUpdatedAt) {
+        isApplyingCloudData = true;
+
+        if (Array.isArray(cloudData.suppliers)) suppliers = cloudData.suppliers;
+        else if (cloudData.suppliers && typeof cloudData.suppliers === "object") suppliers = Object.values(cloudData.suppliers);
+
+        if (Array.isArray(cloudData.bills)) bills = cloudData.bills;
+        else if (cloudData.bills && typeof cloudData.bills === "object") bills = Object.values(cloudData.bills);
+
+        if (Array.isArray(cloudData.sales)) sales = cloudData.sales;
+        else if (cloudData.sales && typeof cloudData.sales === "object") sales = Object.values(cloudData.sales);
+
+        if (cloudData.supplierCatalog) supplierCatalog = cloudData.supplierCatalog;
+
+        // Clean redundant photos in bills if any
+        let cleaned = false;
+        const seenInvoicesWithPhoto = new Set();
+        bills.forEach(b => {
+            const key = b.invoiceId || `${b.billNumber}_${b.supplier}_${b.date}`;
+            if (b.photo) {
+                if (seenInvoicesWithPhoto.has(key)) {
+                    b.photo = null;
+                    cleaned = true;
+                } else {
+                    seenInvoicesWithPhoto.add(key);
+                }
+            }
+        });
+
+        // Save into local storage
+        localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(suppliers));
+        localStorage.setItem(BILLS_KEY, JSON.stringify(bills));
+        localStorage.setItem(SALES_KEY, JSON.stringify(sales));
+        localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
+        localStorage.setItem(CLOUD_UPDATED_AT_KEY, cloudUpdatedAt.toString());
+
+        isApplyingCloudData = false;
+
+        // Re-render UI components
+        populateSupplierDropdowns();
+        renderDashboard();
+        if (currentActiveSection === "bills") renderBills();
+        if (currentActiveSection === "suppliers") renderSuppliers();
+        if (currentActiveSection === "recordSale") renderSales();
+        if (currentActiveSection === "reports") updateReports();
+
+        const timeEl = document.getElementById("cloudLastSyncTime");
+        if (timeEl) {
+            timeEl.innerText = new Date(cloudUpdatedAt).toLocaleTimeString("mr-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        updateSyncBadge("connected", "🟢 क्लाउड चालू");
+        showToast("⚡ नवीन बदल आपोआप सिंक झाले!");
+    }
+}
+
+function pushDataToCloud(force = false) {
+    if (!firebaseDb) return;
+    if (isApplyingCloudData && !force) return;
+
+    isSyncingToCloud = true;
+    updateSyncBadge("syncing", "🔄 सिंक होत आहे...");
+
+    const now = Date.now();
+    localStorage.setItem(CLOUD_UPDATED_AT_KEY, now.toString());
+
+    firebaseDb.ref("poonam_kirana").set({
+        suppliers: suppliers || [],
+        bills: bills || [],
+        sales: sales || [],
+        supplierCatalog: supplierCatalog || {},
+        updatedAt: now
+    }).then(() => {
+        isSyncingToCloud = false;
+        updateSyncBadge("connected", "🟢 क्लाउड चालू");
+        const timeEl = document.getElementById("cloudLastSyncTime");
+        if (timeEl) {
+            timeEl.innerText = new Date(now).toLocaleTimeString("mr-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+    }).catch((err) => {
+        isSyncingToCloud = false;
+        console.error("Cloud push failed:", err);
+        updateSyncBadge("error", "⚠️ सिंक त्रुटी");
+    });
+}
+
+function parseFirebaseInput(text) {
+    if (!text || !text.trim()) return null;
+    const clean = text.trim();
+
+    // 1. Direct URL: https://something-default-rtdb.firebaseio.com or asia-southeast1
+    if (clean.startsWith("http://") || clean.startsWith("https://")) {
+        const url = clean.split("?")[0].replace(/\/+$/, "");
+        let projectId = "poonam-kirana";
+        const m = url.match(/https?:\/\/([^.]+)/);
+        if (m) projectId = m[1].replace(/-default-rtdb$/, "");
+        return {
+            databaseURL: url,
+            projectId: projectId
+        };
+    }
+
+    // 2. Try JSON parse
+    try {
+        const parsed = JSON.parse(clean);
+        if (parsed.databaseURL || parsed.projectId) return parsed;
+    } catch (e) {
+        // Not direct JSON
+    }
+
+    // 3. Regex extractor from Javascript snippet
+    const getVal = (key) => {
+        const reg = new RegExp(key + '\\s*:\\s*["\']([^"\']+)["\']', 'i');
+        const match = clean.match(reg);
+        return match ? match[1] : null;
+    };
+
+    const databaseURL = getVal("databaseURL");
+    const projectId = getVal("projectId");
+    const apiKey = getVal("apiKey");
+    const authDomain = getVal("authDomain");
+    const storageBucket = getVal("storageBucket");
+    const messagingSenderId = getVal("messagingSenderId");
+    const appId = getVal("appId");
+
+    if (databaseURL || projectId) {
+        const obj = {};
+        if (databaseURL) obj.databaseURL = databaseURL;
+        if (projectId) obj.projectId = projectId;
+        if (apiKey) obj.apiKey = apiKey;
+        if (authDomain) obj.authDomain = authDomain;
+        if (storageBucket) obj.storageBucket = storageBucket;
+        if (messagingSenderId) obj.messagingSenderId = messagingSenderId;
+        if (appId) obj.appId = appId;
+        return obj;
+    }
+
+    return null;
+}
+
+function saveFirebaseConfigFromInput() {
+    const input = document.getElementById("firebaseConfigInput");
+    if (!input) return;
+    const val = input.value;
+    const config = parseFirebaseInput(val);
+
+    if (!config || !config.databaseURL) {
+        alert("कृपया वैध Firebase Database URL किंवा Firebase Web Config कोड पेस्ट करा!\n\nउदा: https://poonam-kirana-default-rtdb.firebaseio.com");
+        return;
+    }
+
+    localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(config));
+    initFirebaseSync();
+
+    // Force push current device's data to cloud so mobile and laptop are immediately identical
+    pushDataToCloud(true);
+
+    alert("✅ क्लाउड सिंक यशस्वीरीत्या चालू झाले!\n\nया डिव्हाइसचा सर्व डेटा क्लाउडवर सेव्ह झाला आहे. आता तुमच्या दुसऱ्या डिव्हाइसवरही (मोबाईल किंवा लॅपटॉप) हीच लिंक सेव्ह करा!");
+}
+
+function disconnectCloudSync() {
+    if (confirm("⚠️ क्लाउड सिंक डिस्कनेक्ट करायचे आहे का?\n\nडिस्कनेक्ट केल्यावर बदल फक्त याच डिव्हाइसवर राहतील आणि मोबाईल-लॅपटॉपमध्ये सिंक होणार नाहीत.")) {
+        localStorage.removeItem(FIREBASE_CONFIG_KEY);
+        if (cloudListenerRef) {
+            cloudListenerRef.off();
+            cloudListenerRef = null;
+        }
+        firebaseDb = null;
+        updateCloudSyncUI();
+        updateSyncBadge("disconnected", "क्लाउड सिंक बंद");
+        showToast("क्लाउड सिंक डिस्कनेक्ट केले.");
+    }
+}
+
+function forcePushToCloud() {
+    if (!firebaseDb) {
+        alert("क्लाउड सिंक जोडलेले नाही!");
+        return;
+    }
+    pushDataToCloud(true);
+    showToast("⬆️ डेटा क्लाउडवर पाठवला जात आहे...");
+}
+
+function forcePullFromCloud() {
+    if (!firebaseDb) {
+        alert("क्लाउड सिंक जोडलेले नाही!");
+        return;
+    }
+    showToast("⬇️ क्लाउडवरून डेटा आणत आहे...");
+    firebaseDb.ref("poonam_kirana").once("value").then((snapshot) => {
+        const cloudData = snapshot.val();
+        if (cloudData) {
+            localStorage.setItem(CLOUD_UPDATED_AT_KEY, "0"); // Reset local update timestamp to allow cloud overwrite
+            handleCloudDataReceived(snapshot);
+            showToast("✅ क्लाउड डेटा यशस्वीरीत्या लोड झाला!");
+        } else {
+            alert("क्लाउडवर अजून कोणताही डेटा उपलब्ध नाही.");
+        }
+    }).catch((err) => {
+        alert("क्लाउडवरून डेटा लोड करताना त्रुटी आली: " + err.message);
+    });
+}
+
+function testCloudConnection() {
+    if (!firebaseDb) {
+        alert("क्लाउड सिंक जोडलेले नाही! प्रथम वरील बॉक्समध्ये Firebase Database URL जोडा.");
+        return;
+    }
+    firebaseDb.ref(".info/connected").once("value").then((snap) => {
+        const isOnline = snap.val();
+        if (isOnline) {
+            alert("🎉 अभिनंदन! Google Firebase क्लाउड कनेक्शन उत्तम सुरू आहे!\n\nमोबाईल व लॅपटॉपमध्ये डेटा १ सेकंदात लाईव्ह सिंक होईल.");
+        } else {
+            alert("ℹ️ सध्या क्लाउडशी संपर्क होत आहे किंवा इंटरनेट कनेक्शन संथ आहे.");
+        }
+    }).catch((err) => {
+        alert("कनेक्शन तपासताना त्रुटी: " + err.message);
+    });
+}
+
+function pasteSampleFirebaseHelper() {
+    const input = document.getElementById("firebaseConfigInput");
+    if (!input) return;
+    input.value = `{\n  "apiKey": "AIzaSyB...",\n  "databaseURL": "https://poonam-kirana-default-rtdb.firebaseio.com",\n  "projectId": "poonam-kirana"\n}`;
+}
+
 // ==================== INITIALIZE ====================
 document.addEventListener("DOMContentLoaded", () => {
     initCredentials();
     loadData();
     checkAuth();
+    initFirebaseSync();
 });

@@ -1421,3 +1421,173 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
+/* ==================== CLOUD REALTIME SYNC (FIREBASE) ==================== */
+.cloud-sync-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.cloud-sync-badge.sync-connected {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+.cloud-sync-badge.sync-connected .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulseDot 2s infinite;
+}
+.cloud-sync-badge.sync-syncing {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+.cloud-sync-badge.sync-syncing .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+    animation: pulseDot 0.8s infinite;
+}
+.cloud-sync-badge.sync-disconnected {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+.cloud-sync-badge.sync-disconnected .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+}
+.cloud-sync-badge.sync-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+.cloud-sync-badge.sync-error .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+}
+
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.cloud-card {
+    border-left: 5px solid #0284c7;
+    background: #ffffff;
+    box-shadow: var(--shadow-sm);
+}
+.cloud-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.cloud-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.cloud-icon {
+    font-size: 32px;
+}
+.cloud-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+.cloud-status-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+.pill-connected {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+.pill-disconnected {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+.cloud-active-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+.cloud-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e2e8f0;
+    font-size: 13.5px;
+}
+.cloud-stat-row:last-of-type {
+    border-bottom: none;
+}
+.cloud-actions-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+}
+.cloud-guide-banner {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+.cloud-guide-banner h4 {
+    color: #166534;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+.cloud-guide-banner ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.7;
+}
+.cloud-textarea {
+    width: 100%;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12.5px;
+    padding: 10px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    background: #fdfdfd;
+}
+.cloud-textarea:focus {
+    border-color: #0284c7;
+    outline: none;
+    background: #ffffff;
+}
+
+

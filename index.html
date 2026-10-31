@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js for 1 Year Monthly & Yearly Profit Report -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Firebase SDK (Compat) for Real-time Mobile & Laptop Sync -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -50,6 +53,10 @@
                 <h2>🏪 पूनम किराणा</h2>
             </div>
             <div class="nav-right">
+                <div id="cloudSyncBadge" class="cloud-sync-badge sync-disconnected" onclick="showSection('settings')" title="मोबाईल व लॅपटॉप क्लाउड सिंक स्थिती">
+                    <span class="sync-dot"></span>
+                    <span id="cloudSyncText" class="sync-text">क्लाउड सिंक</span>
+                </div>
                 <span class="user-badge" id="userBadge">👤 admin</span>
                 <button class="btn-logout" onclick="handleLogout()">बाहेर पडा 🚪</button>
             </div>
@@ -648,6 +655,63 @@
                         <h2 class="section-title">⚙️ सेटिंग्ज व सुरक्षितता</h2>
                     </div>
                 </div>
+
+                <!-- ==================== CLOUD SYNC CARD ==================== -->
+                <div class="settings-card cloud-card" id="cloudSyncCard">
+                    <div class="cloud-card-header">
+                        <div class="cloud-title-group">
+                            <span class="cloud-icon">☁️</span>
+                            <div>
+                                <h3 style="margin:0 0 4px 0;">मोबाईल व लॅपटॉप लाईव्ह सिंक (Realtime Cloud Sync)</h3>
+                                <p class="cloud-subtitle">मोबाईलवर केलेले बदल लॅपटॉपवर आणि लॅपटॉपवरील बदल मोबाईलवर एका सेकंदात दिसतील.</p>
+                            </div>
+                        </div>
+                        <div id="cloudStatusPill" class="cloud-status-pill pill-disconnected">
+                            ⚪ सिंक बंद (स्थानिक ऑफलाइन मोड)
+                        </div>
+                    </div>
+
+                    <div id="cloudActiveInfo" class="cloud-active-box" style="display:none;">
+                        <div class="cloud-stat-row">
+                            <span>📡 सिंक स्थिती:</span>
+                            <strong style="color:var(--success);" id="cloudStatusDetail">🟢 लाईव्ह कनेक्टेड</strong>
+                        </div>
+                        <div class="cloud-stat-row">
+                            <span>🕒 शेवटचा सिंक वेळ:</span>
+                            <span id="cloudLastSyncTime">-</span>
+                        </div>
+                        <div class="cloud-actions-row">
+                            <button type="button" class="btn-quick btn-green" onclick="forcePushToCloud()">⬆️ या डिव्हाइसचा डेटा क्लाउडवर पाठवा</button>
+                            <button type="button" class="btn-quick btn-blue" onclick="forcePullFromCloud()">⬇️ क्लाउडचा डेटा इथे लोड करा</button>
+                            <button type="button" class="btn-quick btn-warning" onclick="testCloudConnection()">⚡ कनेक्शन तपासा</button>
+                            <button type="button" class="btn-quick btn-danger" onclick="disconnectCloudSync()">डिस्कनेक्ट करा ✕</button>
+                        </div>
+                    </div>
+
+                    <div id="cloudSetupForm" class="cloud-setup-box">
+                        <div class="cloud-guide-banner">
+                            <h4>📖 २ मिनिटांत मोफत कसे सुरू करायचे? (Google Firebase Setup)</h4>
+                            <ol>
+                                <li>गुगलवर <strong><a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="color:#0284c7; text-decoration:underline;">console.firebase.google.com</a></strong> उघडा.</li>
+                                <li><strong>"Add Project"</strong> वर क्लिक करून नाव द्या: <code>poonam-kirana</code> आणि पुढे जा.</li>
+                                <li>डाव्या मेन्यूमध्ये <strong>Build ➔ Realtime Database ➔ Create Database</strong> करा आणि <strong>"Start in test mode"</strong> निवडून Enable करा.</li>
+                                <li>त्या डेटाबेसची मिळालेली <strong>URL</strong> (उदा. <code>https://poonam-kirana-default-rtdb.firebaseio.com</code>) किंवा <strong>Project Settings (Web App Config Code)</strong> खाली पेस्ट करा:</li>
+                            </ol>
+                        </div>
+
+                        <div class="form-group" style="margin-top:12px;">
+                            <label for="firebaseConfigInput"><strong>Firebase Config कोड किंवा Database URL पेस्ट करा:</strong></label>
+                            <textarea id="firebaseConfigInput" rows="4" placeholder='येथे Firebase Config पेस्ट करा किंवा थेट Database URL: https://your-project-default-rtdb.firebaseio.com' class="cloud-textarea"></textarea>
+                            <small style="color:#64748b; display:block; margin-top:4px;">💡 तुम्ही थेट Database URL किंवा पूर्ण <code>const firebaseConfig = { ... }</code> कोड दोन्हीपैकी काहीही पेस्ट करू शकता.</small>
+                        </div>
+
+                        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                            <button type="button" class="btn-add" onclick="saveFirebaseConfigFromInput()">क्लाउड सिंक सुरू करा 🚀</button>
+                            <button type="button" class="btn-quick" onclick="pasteSampleFirebaseHelper()">नमुना पाहा (Example) 💡</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="settings-card">
                     <h3>🔑 लॉगिन पासवर्ड बदला</h3>
                     <form onsubmit="return changePassword(event)">
