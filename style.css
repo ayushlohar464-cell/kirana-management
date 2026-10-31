@@ -1590,4 +1590,40 @@ body {
     background: #ffffff;
 }
 
+/* BOX & PCS PACK CALCULATION INPUTS & HINTS */
+.item-pcs-input {
+    width: 100%;
+    min-width: 60px;
+    padding: 6px 4px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f8fafc;
+}
+.item-pcs-input:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    outline: none;
+}
+.item-unit-cost-hint {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.item-unit-sell-hint {
+    font-size: 11px;
+    color: #0284c7;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.item-prof-hint {
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+
 

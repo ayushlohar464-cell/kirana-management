@@ -76,32 +76,32 @@ const DEFAULT_SUPPLIERS = [
 
 // ==================== MASTER COLDDRINKS & KIRANA CATALOGS (एकच क्लिकवर सर्व माल लोड करणे) ====================
 const MASTER_COLDDRINKS_CATALOG = [
-    { itemName: "Sprite (स्प्राइट) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 10 },
-    { itemName: "Thums Up (थम्स अप) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 15 },
-    { itemName: "Coca Cola (कोका कोला) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 10 },
-    { itemName: "Maaza (माझा) 600ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 912, quantity: 12 },
-    { itemName: "Sting Energy (स्टिंग) 250ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 480, sellRate: 600, quantity: 15 },
-    { itemName: "Frooti (फ्रुटी) 200ml टेट्रा (40 नग बॉक्स)", section: "colddrinks", unit: "box", buyRate: 460, sellRate: 600, quantity: 12 },
-    { itemName: "Appy Fizz (ॲप्पी फिज) 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 450, sellRate: 600, quantity: 10 },
-    { itemName: "Mountain Dew (माउंटन ड्यु) 750ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 8 },
-    { itemName: "7-Up (7-अप) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
-    { itemName: "Pepsi (पेप्सी) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 8 },
-    { itemName: "Mirinda (मिरिंडा) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
-    { itemName: "Limca (लिम्का) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
-    { itemName: "Fanta (फँटा) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
-    { itemName: "Kinley Soda (किन्ले सोडा) 750ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 360, sellRate: 480, quantity: 10 },
-    { itemName: "Kinley Water (किन्ले पाणी) 1L (12 बॉटल)", section: "colddrinks", unit: "box", buyRate: 140, sellRate: 240, quantity: 15 },
-    { itemName: "Red Bull (रेड बुल) 250ml कॅन (24 कॅन)", section: "colddrinks", unit: "box", buyRate: 2650, sellRate: 3000, quantity: 2 },
-    { itemName: "Jeera Masala Soda (जिरा मसाला सोडा) 200ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 200, sellRate: 288, quantity: 8 },
-    { itemName: "Sprite 250ml Can (स्प्राइट कॅन 24 नग)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 5 },
-    { itemName: "Thums Up 250ml Can (थम्स अप कॅन 24 नग)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 5 },
-    { itemName: "Coca Cola 250ml Can (कोका कोला कॅन 24 नग)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 4 },
-    { itemName: "Maaza 1.2L (माझा मोठी बॉटल 12 बॉटल)", section: "colddrinks", unit: "box", buyRate: 660, sellRate: 840, quantity: 8 },
-    { itemName: "Sprite 2.25L (स्प्राइट मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 855, quantity: 6 },
-    { itemName: "Thums Up 2.25L (थम्स अप मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 855, quantity: 6 },
-    { itemName: "Coca Cola 2.25L (कोका कोला मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 855, quantity: 5 },
-    { itemName: "Bovonto Grape Soda (बोव्होंटो) 250ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 360, sellRate: 480, quantity: 4 },
-    { itemName: "Paper Boat Mango (पेपर बोट) 200ml (24 पॅक)", section: "colddrinks", unit: "box", buyRate: 600, sellRate: 720, quantity: 4 }
+    { itemName: "Sprite (स्प्राइट) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 10 },
+    { itemName: "Thums Up (थम्स अप) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 15 },
+    { itemName: "Coca Cola (कोका कोला) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 10 },
+    { itemName: "Maaza (माझा) 600ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 720, sellRate: 912, quantity: 12 },
+    { itemName: "Sting Energy (स्टिंग) 250ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 30, buyRate: 480, sellRate: 600, quantity: 15 },
+    { itemName: "Frooti (फ्रुटी) 200ml टेट्रा (40 नग बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 40, buyRate: 460, sellRate: 600, quantity: 12 },
+    { itemName: "Appy Fizz (ॲप्पी फिज) 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 30, buyRate: 450, sellRate: 600, quantity: 10 },
+    { itemName: "Mountain Dew (माउंटन ड्यु) 750ml (24 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 8 },
+    { itemName: "7-Up (7-अप) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Pepsi (पेप्सी) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 8 },
+    { itemName: "Mirinda (मिरिंडा) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Limca (लिम्का) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Fanta (फँटा) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Kinley Soda (किन्ले सोडा) 750ml (24 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 360, sellRate: 480, quantity: 10 },
+    { itemName: "Kinley Water (किन्ले पाणी) 1L (12 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 12, buyRate: 140, sellRate: 240, quantity: 15 },
+    { itemName: "Red Bull (रेड बुल) 250ml कॅन (24 कॅन)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 2650, sellRate: 3000, quantity: 2 },
+    { itemName: "Jeera Masala Soda (जिरा मसाला सोडा) 200ml (24 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 200, sellRate: 288, quantity: 8 },
+    { itemName: "Sprite 250ml Can (स्प्राइट कॅन 24 नग)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 720, sellRate: 960, quantity: 5 },
+    { itemName: "Thums Up 250ml Can (थम्स अप कॅन 24 नग)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 720, sellRate: 960, quantity: 5 },
+    { itemName: "Coca Cola 250ml Can (कोका कोला कॅन 24 नग)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 720, sellRate: 960, quantity: 4 },
+    { itemName: "Maaza 1.2L (माझा मोठी बॉटल 12 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 12, buyRate: 660, sellRate: 840, quantity: 8 },
+    { itemName: "Sprite 2.25L (स्प्राइट मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 9, buyRate: 720, sellRate: 855, quantity: 6 },
+    { itemName: "Thums Up 2.25L (थम्स अप मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 9, buyRate: 720, sellRate: 855, quantity: 6 },
+    { itemName: "Coca Cola 2.25L (कोका कोला मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 9, buyRate: 720, sellRate: 855, quantity: 5 },
+    { itemName: "Bovonto Grape Soda (बोव्होंटो) 250ml (24 बॉटल)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 360, sellRate: 480, quantity: 4 },
+    { itemName: "Paper Boat Mango (पेपर बोट) 200ml (24 पॅक)", section: "colddrinks", unit: "box", pcsPerBox: 24, buyRate: 600, sellRate: 720, quantity: 4 }
 ];
 
 const MASTER_KIRANA_CATALOG = [
@@ -371,6 +371,7 @@ const SALES_KEY = "kirana_sales_data_v2";
 const CATALOG_KEY = "kirana_supplier_catalog_v2";
 const AUTH_KEY = "kirana_auth_status_v2";
 const USER_CRED_KEY = "kirana_user_credentials_v2";
+const CUSTOM_ITEMS_KEY = "kirana_custom_master_items_v1";
 
 // ==================== CLOUD SYNC STATE (FIREBASE REALTIME DATABASE) ====================
 const FIREBASE_CONFIG_KEY = "kirana_firebase_config_v1";
@@ -380,6 +381,7 @@ let firebaseDb = null;
 let isSyncingToCloud = false;
 let isApplyingCloudData = false;
 let cloudListenerRef = null;
+let customMasterItems = [];
 
 function initCredentials() {
     if (!localStorage.getItem(USER_CRED_KEY)) {
@@ -402,6 +404,9 @@ function loadData() {
 
     const savedCatalog = localStorage.getItem(CATALOG_KEY);
     supplierCatalog = savedCatalog ? JSON.parse(savedCatalog) : {};
+
+    const savedCustom = localStorage.getItem(CUSTOM_ITEMS_KEY);
+    customMasterItems = savedCustom ? JSON.parse(savedCustom) : [];
 
     // ⚡ SPEED OPTIMIZATION: Clean up any duplicate bloated photos in memory/localStorage
     let cleaned = false;
@@ -432,6 +437,7 @@ function saveData() {
     }
     localStorage.setItem(SALES_KEY, JSON.stringify(sales));
     localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
+    localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
 
     // ⚡ Realtime Push to Firebase Cloud (Sync Mobile & Laptop)
     pushDataToCloud();
@@ -559,6 +565,7 @@ function showSection(secId, isBackAction = false) {
     else if (secId === "recordSale") renderSalesList();
     else if (secId === "reports") renderReports();
     else if (secId === "addBill") { populateSupplierDropdowns(); initBulkBillForm(); }
+    else if (secId === "itemsCatalog") renderMasterCatalogTable();
 }
 
 function goBack() {
@@ -852,6 +859,9 @@ function searchCatalogItems(query) {
         });
     }
 
+    // 0. User's custom saved items (highest priority)
+    addList(customMasterItems);
+
     // 1. Current supplier catalog & past bills
     const suppSelect = document.getElementById("billSupplierSelect");
     if (suppSelect && suppSelect.value) {
@@ -893,9 +903,17 @@ function searchCatalogItems(query) {
         if (q === "je" && name.includes("jeera")) return true;
         if (q === "bo" && name.includes("bovonto")) return true;
         if (q === "pa" && (name.includes("parle") || name.includes("paper"))) return true;
+        if ((q === "m" || q === "mp" || q === "po") && (name.includes("power") || name.includes("m power"))) return true;
 
         return false;
     }).slice(0, 15);
+}
+
+function extractPcsFromTitle(title) {
+    if (!title) return 1;
+    const m = title.match(/(\d+)\s*(?:बॉटल|नग|कॅन|पाकिट|पॅक|कप)/i);
+    if (m) return parseInt(m[1], 10);
+    return 1;
 }
 
 // 1-Click Batch Loader for Categories (सर्व कोल्ड ड्रिंक्स / किराणा एकदम लोड करा)
@@ -988,6 +1006,7 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
     const section = itemData ? (itemData.section || "kirana") : "kirana";
     const unit = itemData ? (itemData.unit || "box") : "box";
     const quantity = itemData ? (itemData.quantity || 1) : 1;
+    let pcsPerBox = itemData ? (itemData.pcsPerBox || extractPcsFromTitle(itemName) || (unit === 'box' || unit === 'crate' ? 24 : 1)) : (unit === 'box' || unit === 'crate' ? 24 : 1);
     const buyRate = itemData && itemData.buyRate !== undefined ? itemData.buyRate : "";
     const sellRate = itemData && itemData.sellRate !== undefined ? itemData.sellRate : "";
 
@@ -1023,14 +1042,22 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
             <input type="number" class="item-qty-input" min="1" step="1" value="${quantity}" placeholder="1" style="text-align:right;">
         </td>
         <td>
-            <input type="number" class="item-buy-input" min="0" step="0.01" value="${buyRate}" placeholder="0.00" style="text-align:right;">
+            <input type="number" class="item-pcs-input" min="1" step="1" value="${pcsPerBox}" placeholder="1" style="text-align:right;" title="१ बॉक्स किंवा पॅकमध्ये असणारे एकूण नग">
+        </td>
+        <td>
+            <input type="number" class="item-buy-input" min="0" step="0.01" value="${buyRate}" placeholder="0.00" style="text-align:right;" title="खरेदी दर (प्रति बॉक्स किंवा नग)">
+            <div class="item-unit-cost-hint"></div>
         </td>
         <td class="item-calc-col item-calc-cost">₹0.00</td>
         <td>
-            <input type="number" class="item-sell-input" min="0" step="0.01" value="${sellRate}" placeholder="0.00" style="text-align:right;">
+            <input type="number" class="item-sell-input" min="0" step="0.01" value="${sellRate}" placeholder="0.00" style="text-align:right;" title="विक्री दर (प्रति नग किंवा पूर्ण बॉक्स)">
+            <div class="item-unit-sell-hint"></div>
         </td>
         <td class="item-calc-col item-calc-exp">₹0.00</td>
-        <td class="item-calc-col item-calc-prof">₹0.00</td>
+        <td class="item-calc-col item-calc-prof">
+            <span class="prof-val">₹0.00</span>
+            <div class="item-prof-hint"></div>
+        </td>
         <td style="text-align:center;">
             <button type="button" class="btn-row-del" onclick="removeBillItemRow(this)" title="ही ओळ हटवा">✕</button>
         </td>
@@ -1041,6 +1068,7 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
     const secSelect = tr.querySelector(".item-section-select");
     const unitSelect = tr.querySelector(".item-unit-select");
     const qtyInput = tr.querySelector(".item-qty-input");
+    const pcsInput = tr.querySelector(".item-pcs-input");
     const buyInput = tr.querySelector(".item-buy-input");
     const sellInput = tr.querySelector(".item-sell-input");
 
@@ -1061,10 +1089,11 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
         matches.forEach(m => {
             const itemDiv = document.createElement("div");
             itemDiv.className = "autocomplete-item";
+            const pcsInfo = m.pcsPerBox ? ` | ${m.pcsPerBox} नग/बॉक्स` : "";
             itemDiv.innerHTML = `
                 <div class="autocomplete-item-title">${m.itemName}</div>
                 <div class="autocomplete-item-sub">
-                    ${SECTION_CONFIG[m.section]?.name || m.section} | खरेदी: ₹${m.buyRate} | विक्री: ₹${m.sellRate}
+                    ${SECTION_CONFIG[m.section]?.name || m.section}${pcsInfo} | खरेदी: ₹${m.buyRate} | विक्री: ₹${m.sellRate}
                 </div>
             `;
 
@@ -1083,6 +1112,8 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
         nameInput.value = item.itemName;
         if (item.section) secSelect.value = item.section;
         if (item.unit) unitSelect.value = item.unit;
+        if (item.pcsPerBox) pcsInput.value = item.pcsPerBox;
+        else pcsInput.value = extractPcsFromTitle(item.itemName) || (item.unit === 'box' || item.unit === 'crate' ? 24 : 1);
         if (item.buyRate) buyInput.value = item.buyRate;
         if (item.sellRate) sellInput.value = item.sellRate;
         dropdown.style.display = "none";
@@ -1115,6 +1146,8 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
             if (exact && (!buyInput.value || !sellInput.value)) {
                 if (exact.section) secSelect.value = exact.section;
                 if (exact.unit) unitSelect.value = exact.unit;
+                if (exact.pcsPerBox) pcsInput.value = exact.pcsPerBox;
+                else pcsInput.value = extractPcsFromTitle(exact.itemName) || (exact.unit === 'box' || exact.unit === 'crate' ? 24 : 1);
                 if (exact.buyRate && !buyInput.value) buyInput.value = exact.buyRate;
                 if (exact.sellRate && !sellInput.value) sellInput.value = exact.sellRate;
                 calculateMultiItemBillLive();
@@ -1122,7 +1155,16 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
         }
     });
 
-    [qtyInput, buyInput, sellInput].forEach(inp => {
+    unitSelect.addEventListener("change", () => {
+        if (unitSelect.value === "piece" || unitSelect.value === "kg" || unitSelect.value === "liter") {
+            pcsInput.value = 1;
+        } else if (pcsInput.value == 1) {
+            pcsInput.value = extractPcsFromTitle(nameInput.value) || 24;
+        }
+        calculateMultiItemBillLive();
+    });
+
+    [qtyInput, pcsInput, buyInput, sellInput].forEach(inp => {
         inp.addEventListener("input", calculateMultiItemBillLive);
     });
 
@@ -1205,22 +1247,73 @@ function calculateMultiItemBillLive() {
     rows.forEach(r => {
         const name = r.querySelector(".item-name-input")?.value?.trim() || "";
         const qty = parseFloat(r.querySelector(".item-qty-input")?.value) || 0;
+        let pcs = parseFloat(r.querySelector(".item-pcs-input")?.value) || 1;
+        if (pcs <= 0) pcs = 1;
+
         const buy = parseFloat(r.querySelector(".item-buy-input")?.value) || 0;
         const sell = parseFloat(r.querySelector(".item-sell-input")?.value) || 0;
 
+        // Total buy cost:
         const rowCost = qty * buy;
-        const rowExpected = qty * sell;
+        // Cost per individual piece:
+        const costPerPiece = pcs > 0 ? (buy / pcs) : buy;
+
+        // Hints
+        const costHint = r.querySelector(".item-unit-cost-hint");
+        const sellHint = r.querySelector(".item-unit-sell-hint");
+        const profHint = r.querySelector(".item-prof-hint");
+
+        if (costHint) {
+            if (pcs > 1 && buy > 0) {
+                costHint.innerText = `₹${costPerPiece.toFixed(2)}/नग पडत`;
+            } else {
+                costHint.innerText = "";
+            }
+        }
+
+        // Determine selling turnover
+        let rowExpected = 0;
+        let sellPerPiece = 0;
+        let sellPerBox = 0;
+
+        if (pcs > 1 && sell > 0 && sell < buy) {
+            // User entered per-piece selling price (e.g. 60 vs 1200)
+            sellPerPiece = sell;
+            sellPerBox = sell * pcs;
+            rowExpected = qty * sellPerBox;
+            if (sellHint) sellHint.innerText = `(बॉक्स: ₹${sellPerBox.toFixed(2)})`;
+        } else if (sell > 0) {
+            // User entered total per-box selling price (e.g. 1440)
+            sellPerBox = sell;
+            sellPerPiece = pcs > 0 ? (sell / pcs) : sell;
+            rowExpected = qty * sell;
+            if (sellHint && pcs > 1) sellHint.innerText = `(नग: ₹${sellPerPiece.toFixed(2)})`;
+            else if (sellHint) sellHint.innerText = "";
+        } else {
+            if (sellHint) sellHint.innerText = "";
+        }
+
         const rowProfit = rowExpected - rowCost;
+        const profitPerPiece = (pcs > 0 && qty > 0) ? (rowProfit / (qty * pcs)) : 0;
 
         const costCell = r.querySelector(".item-calc-cost");
         const expCell = r.querySelector(".item-calc-exp");
-        const profCell = r.querySelector(".item-calc-prof");
+        const profCell = r.querySelector(".item-calc-prof .prof-val") || r.querySelector(".item-calc-prof");
 
         if (costCell) costCell.innerText = `₹${rowCost.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
         if (expCell) expCell.innerText = `₹${rowExpected.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
         if (profCell) {
             profCell.innerText = `₹${rowProfit.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
             profCell.style.color = rowProfit >= 0 ? "#15803d" : "#dc2626";
+        }
+
+        if (profHint) {
+            if (pcs > 1 && rowExpected > 0) {
+                profHint.innerText = `(नफा: ₹${profitPerPiece.toFixed(2)}/नग)`;
+                profHint.style.color = profitPerPiece >= 0 ? "#15803d" : "#dc2626";
+            } else {
+                profHint.innerText = "";
+            }
         }
 
         if (name && qty > 0 && buy > 0) {
@@ -2136,12 +2229,29 @@ function handleSaveBulkBill(e) {
         const section = r.querySelector(".item-section-select")?.value || "kirana";
         const unit = r.querySelector(".item-unit-select")?.value || "box";
         const quantity = parseFloat(r.querySelector(".item-qty-input")?.value) || 0;
+        let pcsPerBox = parseFloat(r.querySelector(".item-pcs-input")?.value) || 1;
+        if (pcsPerBox <= 0) pcsPerBox = 1;
         const buyRate = parseFloat(r.querySelector(".item-buy-input")?.value) || 0;
         const sellRate = parseFloat(r.querySelector(".item-sell-input")?.value) || 0;
 
         if (itemName && quantity > 0 && buyRate > 0) {
             const totalCost = quantity * buyRate;
-            const totalExpected = quantity * sellRate;
+            const costPerPiece = pcsPerBox > 0 ? (buyRate / pcsPerBox) : buyRate;
+
+            let totalExpected = 0;
+            let sellPerPiece = 0;
+            let sellPerBox = 0;
+
+            if (pcsPerBox > 1 && sellRate > 0 && sellRate < buyRate) {
+                sellPerPiece = sellRate;
+                sellPerBox = sellRate * pcsPerBox;
+                totalExpected = quantity * sellPerBox;
+            } else if (sellRate > 0) {
+                sellPerBox = sellRate;
+                sellPerPiece = pcsPerBox > 0 ? (sellRate / pcsPerBox) : sellRate;
+                totalExpected = quantity * sellRate;
+            }
+
             const profit = totalExpected - totalCost;
             const margin = totalExpected > 0 ? ((profit / totalExpected) * 100).toFixed(1) : "0.0";
 
@@ -2150,9 +2260,12 @@ function handleSaveBulkBill(e) {
                 section,
                 unit,
                 quantity,
+                pcsPerBox,
+                costPerPiece,
                 buyRate,
                 totalCost,
-                sellRate,
+                sellRate: sellPerBox,
+                sellRatePerPiece: sellPerPiece,
                 totalExpected,
                 profit,
                 margin
@@ -3013,7 +3126,8 @@ function updateSyncBadge(status, text) {
         } else if (status === "syncing") {
             detail.innerHTML = '<span style="color:#2563eb;">🔄 बदल सिंक होत आहेत...</span>';
         } else if (status === "error") {
-            detail.innerHTML = '<span style="color:#dc2626;">⚠️ कनेक्शन अडचण (ऑफलाइन मोड)</span>';
+            const errReason = window.lastFirebaseErrorMsg || "डेटाबेस परवानगी किंवा URL तपासा";
+            detail.innerHTML = `<span style="color:#dc2626;">⚠️ कनेक्शन अडचण: ${errReason}</span><br><small style="color:#475569;">💡 खाली '✏️ लिंक बदला' वर क्लिक करा किंवा Firebase मधील Rules (.read: true, .write: true) तपासा.</small>`;
         } else {
             detail.innerHTML = '<span style="color:#64748b;">⚪ बंद</span>';
         }
@@ -3064,7 +3178,12 @@ function initFirebaseSync() {
         cloudListenerRef = firebaseDb.ref("poonam_kirana");
         cloudListenerRef.on("value", handleCloudDataReceived, (err) => {
             console.error("Firebase listen error:", err);
-            updateSyncBadge("error", "⚠️ कनेक्शन त्रुटी");
+            let msg = err.message || "त्रुटी";
+            if (msg.toLowerCase().includes("permission_denied") || msg.toLowerCase().includes("permission denied")) {
+                msg = "डेटाबेस परवानगी नाकारली (Permission Denied). Firebase Rules मध्ये .read: true आणि .write: true करा.";
+            }
+            window.lastFirebaseErrorMsg = msg;
+            updateSyncBadge("error", "⚠️ सिंक त्रुटी");
         });
 
         // Set last sync time if available
@@ -3103,6 +3222,10 @@ function handleCloudDataReceived(snapshot) {
         else if (cloudData.sales && typeof cloudData.sales === "object") sales = Object.values(cloudData.sales);
 
         if (cloudData.supplierCatalog) supplierCatalog = cloudData.supplierCatalog;
+
+        if (Array.isArray(cloudData.customMasterItems)) customMasterItems = cloudData.customMasterItems;
+        else if (cloudData.customMasterItems && typeof cloudData.customMasterItems === "object") customMasterItems = Object.values(cloudData.customMasterItems);
+        localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
 
         // Clean redundant photos in bills if any
         let cleaned = false;
@@ -3161,6 +3284,7 @@ function pushDataToCloud(force = false) {
         bills: bills || [],
         sales: sales || [],
         supplierCatalog: supplierCatalog || {},
+        customMasterItems: customMasterItems || [],
         updatedAt: now
     }).then(() => {
         isSyncingToCloud = false;
@@ -3250,6 +3374,25 @@ function saveFirebaseConfigFromInput() {
     alert("✅ क्लाउड सिंक यशस्वीरीत्या चालू झाले!\n\nया डिव्हाइसचा सर्व डेटा क्लाउडवर सेव्ह झाला आहे. आता तुमच्या दुसऱ्या डिव्हाइसवरही (मोबाईल किंवा लॅपटॉप) हीच लिंक सेव्ह करा!");
 }
 
+function editFirebaseConfig() {
+    const rawConfig = localStorage.getItem(FIREBASE_CONFIG_KEY);
+    const activeBox = document.getElementById("cloudActiveInfo");
+    const setupBox = document.getElementById("cloudSetupForm");
+    const input = document.getElementById("firebaseConfigInput");
+
+    if (activeBox) activeBox.style.display = "none";
+    if (setupBox) setupBox.style.display = "block";
+
+    if (input && rawConfig) {
+        try {
+            const parsed = JSON.parse(rawConfig);
+            input.value = parsed.databaseURL || rawConfig;
+        } catch (e) {
+            input.value = rawConfig;
+        }
+    }
+}
+
 function disconnectCloudSync() {
     if (confirm("⚠️ क्लाउड सिंक डिस्कनेक्ट करायचे आहे का?\n\nडिस्कनेक्ट केल्यावर बदल फक्त याच डिव्हाइसवर राहतील आणि मोबाईल-लॅपटॉपमध्ये सिंक होणार नाहीत.")) {
         localStorage.removeItem(FIREBASE_CONFIG_KEY);
@@ -3314,6 +3457,221 @@ function pasteSampleFirebaseHelper() {
     const input = document.getElementById("firebaseConfigInput");
     if (!input) return;
     input.value = `{\n  "apiKey": "AIzaSyB...",\n  "databaseURL": "https://poonam-kirana-default-rtdb.firebaseio.com",\n  "projectId": "poonam-kirana"\n}`;
+}
+
+// ==================== ITEM MASTER / CUSTOM ITEMS ====================
+
+function openAddItemModal(prefillName = "") {
+    const modal = document.getElementById("addItemModal");
+    if (!modal) return;
+    const nameInp = document.getElementById("customItemName");
+    if (nameInp) nameInp.value = prefillName;
+
+    calculateCustomItemModalPreview();
+    modal.style.display = "flex";
+    if (nameInp) setTimeout(() => nameInp.focus(), 60);
+}
+
+function closeAddItemModal() {
+    const modal = document.getElementById("addItemModal");
+    if (modal) modal.style.display = "none";
+}
+
+function toggleCustomItemBoxFields() {
+    const unit = document.getElementById("customItemUnit")?.value || "box";
+    const pcsInp = document.getElementById("customItemPcs");
+    if (pcsInp) {
+        if (unit === "piece" || unit === "kg" || unit === "liter") {
+            pcsInp.value = 1;
+        } else if (pcsInp.value == 1) {
+            pcsInp.value = 24;
+        }
+    }
+    calculateCustomItemModalPreview();
+}
+
+function calculateCustomItemModalPreview() {
+    const pcs = parseFloat(document.getElementById("customItemPcs")?.value) || 1;
+    const buy = parseFloat(document.getElementById("customItemBuyRate")?.value) || 0;
+    const sell = parseFloat(document.getElementById("customItemSellRate")?.value) || 0;
+
+    const costPerPcs = pcs > 0 ? (buy / pcs) : buy;
+    let sellPerPcs = 0;
+    let sellPerBox = 0;
+
+    if (pcs > 1 && sell > 0 && sell < buy) {
+        sellPerPcs = sell;
+        sellPerBox = sell * pcs;
+    } else if (sell > 0) {
+        sellPerBox = sell;
+        sellPerPcs = pcs > 0 ? (sell / pcs) : sell;
+    }
+
+    const profitPerBox = sellPerBox - buy;
+    const profitPerPcs = sellPerPcs - costPerPcs;
+    const margin = sellPerBox > 0 ? ((profitPerBox / sellPerBox) * 100).toFixed(1) : "0.0";
+
+    const costEl = document.getElementById("previewCostPerPcs");
+    const sellEl = document.getElementById("previewSellPerPcs");
+    const profPcsEl = document.getElementById("previewProfitPerPcs");
+    const profBoxEl = document.getElementById("previewProfitPerBox");
+
+    if (costEl) costEl.innerText = `₹${costPerPcs.toFixed(2)}`;
+    if (sellEl) sellEl.innerText = `₹${sellPerPcs.toFixed(2)}`;
+    if (profPcsEl) {
+        profPcsEl.innerText = `₹${profitPerPcs.toFixed(2)}`;
+        profPcsEl.style.color = profitPerPcs >= 0 ? "#15803d" : "#dc2626";
+    }
+    if (profBoxEl) {
+        profBoxEl.innerText = `₹${profitPerBox.toFixed(2)} (${margin}%)`;
+        profBoxEl.style.color = profitPerBox >= 0 ? "#15803d" : "#dc2626";
+    }
+}
+
+function handleSaveCustomItem(e) {
+    e.preventDefault();
+    const itemName = document.getElementById("customItemName")?.value?.trim();
+    const section = document.getElementById("customItemSection")?.value || "colddrinks";
+    const unit = document.getElementById("customItemUnit")?.value || "box";
+    let pcs = parseFloat(document.getElementById("customItemPcs")?.value) || 1;
+    if (pcs <= 0) pcs = 1;
+    const buyRate = parseFloat(document.getElementById("customItemBuyRate")?.value) || 0;
+    const sellRate = parseFloat(document.getElementById("customItemSellRate")?.value) || 0;
+
+    if (!itemName) {
+        alert("कृपया मालाचे नाव टाका!");
+        return false;
+    }
+
+    let sellPerPcs = 0;
+    let sellPerBox = 0;
+    if (pcs > 1 && sellRate > 0 && sellRate < buyRate) {
+        sellPerPcs = sellRate;
+        sellPerBox = sellRate * pcs;
+    } else {
+        sellPerBox = sellRate;
+        sellPerPcs = pcs > 0 ? (sellRate / pcs) : sellRate;
+    }
+
+    const newItem = {
+        id: Date.now(),
+        itemName,
+        section,
+        unit,
+        pcsPerBox: pcs,
+        buyRate,
+        sellRate: sellPerBox,
+        sellRatePerPiece: sellPerPcs,
+        costPerPiece: pcs > 0 ? (buyRate / pcs) : buyRate,
+        isCustom: true
+    };
+
+    // Remove old if exists
+    customMasterItems = customMasterItems.filter(it => it.itemName.toLowerCase() !== itemName.toLowerCase());
+    customMasterItems.unshift(newItem);
+
+    saveData();
+    closeAddItemModal();
+    showToast(`🎉 "${itemName}" सिस्टीममध्ये कायमचा सेव्ह झाला!`);
+
+    // If currently on Add Bill page, append row with this item
+    const tbody = document.getElementById("billItemsTableBody");
+    if (tbody && currentActiveSection === "addBill") {
+        addBillItemRow(newItem, true);
+    }
+
+    if (currentActiveSection === "itemsCatalog") {
+        renderMasterCatalogTable();
+    }
+
+    return false;
+}
+
+function renderMasterCatalogTable() {
+    const tbody = document.getElementById("masterCatalogTableBody");
+    if (!tbody) return;
+
+    const q = (document.getElementById("catalogSearchInput")?.value || "").trim().toLowerCase();
+    const secFilter = document.getElementById("catalogSectionFilter")?.value || "all";
+
+    // Gather all items: Custom items first, then Master colddrinks, then Master Kirana
+    const map = new Map();
+    customMasterItems.forEach(it => map.set(it.itemName.toLowerCase(), { ...it, source: "custom" }));
+    MASTER_COLDDRINKS_CATALOG.forEach(it => {
+        const k = it.itemName.toLowerCase();
+        if (!map.has(k)) map.set(k, { ...it, pcsPerBox: it.pcsPerBox || extractPcsFromTitle(it.itemName) || 24, source: "master" });
+    });
+    MASTER_KIRANA_CATALOG.forEach(it => {
+        const k = it.itemName.toLowerCase();
+        if (!map.has(k)) map.set(k, { ...it, pcsPerBox: it.pcsPerBox || extractPcsFromTitle(it.itemName) || 1, source: "master" });
+    });
+
+    let items = Array.from(map.values());
+
+    if (secFilter !== "all") {
+        items = items.filter(it => it.section === secFilter);
+    }
+    if (q) {
+        items = items.filter(it => it.itemName.toLowerCase().includes(q) || (it.section && it.section.toLowerCase().includes(q)));
+    }
+
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:#64748b;">कोणताही माल सापडला नाही.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = items.map((it, idx) => {
+        const pcs = it.pcsPerBox || 1;
+        const buy = it.buyRate || 0;
+        const sell = it.sellRate || 0;
+        const costPerPcs = pcs > 0 ? (buy / pcs) : buy;
+        const profit = sell - buy;
+        const margin = sell > 0 ? ((profit / sell) * 100).toFixed(1) : "0.0";
+        const isCustom = it.source === "custom";
+
+        return `
+            <tr>
+                <td style="text-align:center;">${idx + 1}</td>
+                <td>
+                    <strong>${it.itemName}</strong>
+                    ${isCustom ? '<span style="background:#e0e7ff; color:#3730a3; font-size:10.5px; padding:2px 6px; border-radius:10px; margin-left:6px; font-weight:700;">तुमचा माल</span>' : ''}
+                </td>
+                <td>${SECTION_CONFIG[it.section]?.name || it.section}</td>
+                <td>${it.unit || 'बॉक्स'}</td>
+                <td style="text-align:right; font-weight:700; color:#0f172a;">${pcs} नग</td>
+                <td style="text-align:right;">₹${buy.toFixed(2)}</td>
+                <td style="text-align:right; color:#64748b; font-size:12.5px;">₹${costPerPcs.toFixed(2)}</td>
+                <td style="text-align:right; font-weight:600; color:#0284c7;">₹${sell.toFixed(2)}</td>
+                <td style="text-align:right; font-weight:700; color:${profit >= 0 ? '#15803d' : '#dc2626'};">
+                    +₹${profit.toFixed(2)} (${margin}%)
+                </td>
+                <td style="text-align:center;">
+                    <button type="button" class="btn-quick btn-green" onclick="addCatalogItemToActiveBill('${encodeURIComponent(it.itemName)}')" title="हा माल बिलात जोडा">➕ बिलात घ्या</button>
+                    ${isCustom ? `<button type="button" class="btn-sm btn-delete" onclick="deleteCustomItem('${encodeURIComponent(it.itemName)}')" title="हटवा" style="margin-left:4px;">🗑️</button>` : ''}
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function addCatalogItemToActiveBill(encodedName) {
+    const itemName = decodeURIComponent(encodedName);
+    const item = searchCatalogItems(itemName).find(it => it.itemName === itemName);
+    if (!item) return;
+
+    showSection('addBill');
+    addBillItemRow(item, true);
+    showToast(`✅ "${itemName}" बिलामध्ये जोडला!`);
+}
+
+function deleteCustomItem(encodedName) {
+    const itemName = decodeURIComponent(encodedName);
+    if (confirm(`⚠️ "${itemName}" हा माल सिस्टीममधून हटवायचा आहे का?`)) {
+        customMasterItems = customMasterItems.filter(it => it.itemName !== itemName);
+        saveData();
+        renderMasterCatalogTable();
+        showToast("माल हटवला गेला.");
+    }
 }
 
 // ==================== INITIALIZE ====================
