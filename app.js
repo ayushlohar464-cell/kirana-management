@@ -2405,50 +2405,92 @@ function handleRecordSale(e) {
 // ==================== DASHBOARD RENDERING ====================
 function renderDashboard() {
     const totalPurchase = bills.reduce((sum, b) => sum + (parseFloat(b.totalCost) || 0), 0);
+    const expectedTurnover = bills.reduce((sum, b) => sum + (parseFloat(b.totalExpected) || 0), 0);
+    const expectedProfit = bills.reduce((sum, b) => sum + (parseFloat(b.profit) || 0), 0);
+    const expectedMargin = expectedTurnover > 0 ? ((expectedProfit / expectedTurnover) * 100).toFixed(1) : "0.0";
+
     const totalSales = sales.reduce((sum, s) => sum + (parseFloat(s.saleAmount) || 0), 0);
     const totalCostOfSales = sales.reduce((sum, s) => sum + (parseFloat(s.costPrice) || 0), 0);
     const realizedProfit = totalSales - totalCostOfSales;
     const netMargin = totalSales > 0 ? ((realizedProfit / totalSales) * 100).toFixed(1) : "0.0";
 
-    document.getElementById("dashTotalPurchase").innerText = `₹${totalPurchase.toLocaleString('en-IN')}`;
-    document.getElementById("dashTotalBills").innerText = `${bills.length} सप्लायर बिले`;
+    // Card 1: Purchase
+    const dashPurchaseEl = document.getElementById("dashTotalPurchase");
+    const dashBillsEl = document.getElementById("dashTotalBills");
+    if (dashPurchaseEl) dashPurchaseEl.innerText = `₹${totalPurchase.toLocaleString('en-IN')}`;
+    if (dashBillsEl) dashBillsEl.innerText = `${bills.length} सप्लायर बिले`;
 
-    document.getElementById("dashTotalSales").innerText = `₹${totalSales.toLocaleString('en-IN')}`;
-    document.getElementById("dashSalesCount").innerText = `${sales.length} विक्री नोंदी`;
+    // Card 2: Sales / Turnover
+    const dashSalesEl = document.getElementById("dashTotalSales");
+    const dashSalesCountEl = document.getElementById("dashSalesCount");
+    if (totalSales > 0) {
+        if (dashSalesEl) dashSalesEl.innerText = `₹${totalSales.toLocaleString('en-IN')}`;
+        if (dashSalesCountEl) dashSalesCountEl.innerText = `${sales.length} प्रत्यक्ष विक्री नोंदी (अपेक्षित: ₹${expectedTurnover.toLocaleString('en-IN')})`;
+    } else {
+        if (dashSalesEl) dashSalesEl.innerText = `₹${expectedTurnover.toLocaleString('en-IN')}`;
+        if (dashSalesCountEl) dashSalesCountEl.innerText = `मालावर अपेक्षित विक्री (0 प्रत्यक्ष नोंदी)`;
+    }
 
-    document.getElementById("dashTotalProfit").innerText = `₹${realizedProfit.toLocaleString('en-IN')}`;
-    document.getElementById("dashNetMargin").innerText = `${netMargin}% प्रत्यक्ष मार्जिन`;
+    // Card 3: Profit
+    const dashProfitEl = document.getElementById("dashTotalProfit");
+    const dashMarginEl = document.getElementById("dashNetMargin");
+    if (totalSales > 0) {
+        if (dashProfitEl) dashProfitEl.innerText = `₹${realizedProfit.toLocaleString('en-IN')}`;
+        if (dashMarginEl) dashMarginEl.innerText = `${netMargin}% प्रत्यक्ष नफा (अपेक्षित: ₹${expectedProfit.toLocaleString('en-IN')})`;
+    } else {
+        if (dashProfitEl) dashProfitEl.innerText = `₹${expectedProfit.toLocaleString('en-IN')}`;
+        if (dashMarginEl) dashMarginEl.innerText = `${expectedMargin}% बिलावरील अपेक्षित नफा`;
+    }
 
-    document.getElementById("dashSuppliersCount").innerText = `${suppliers.length} सप्लायर्स`;
+    // Card 4: Suppliers
+    const dashSuppCountEl = document.getElementById("dashSuppliersCount");
+    if (dashSuppCountEl) dashSuppCountEl.innerText = `${suppliers.length} सप्लायर्स`;
 
     // Section Summary Table
     const secSummaryBody = document.getElementById("dashSectionSummaryBody");
-    secSummaryBody.innerHTML = "";
+    if (secSummaryBody) {
+        secSummaryBody.innerHTML = "";
 
-    Object.keys(SECTION_CONFIG).forEach(key => {
-        const secBills = bills.filter(b => b.section === key);
-        const secSales = sales.filter(s => s.section === key);
+        Object.keys(SECTION_CONFIG).forEach(key => {
+            const secBills = bills.filter(b => b.section === key);
+            const secSales = sales.filter(s => s.section === key);
 
-        const totalQty = secBills.reduce((s, b) => s + (parseFloat(b.quantity) || 0), 0);
-        const totalBuy = secBills.reduce((s, b) => s + (parseFloat(b.totalCost) || 0), 0);
-        const secSaleTurnover = secSales.reduce((s, sl) => s + (parseFloat(sl.saleAmount) || 0), 0);
-        const secCost = secSales.reduce((s, sl) => s + (parseFloat(sl.costPrice) || 0), 0);
-        const secProfit = secSaleTurnover - secCost;
-        const secMargin = secSaleTurnover > 0 ? ((secProfit / secSaleTurnover) * 100).toFixed(1) : "0.0";
+            const totalQty = secBills.reduce((s, b) => s + (parseFloat(b.quantity) || 0), 0);
+            const totalBuy = secBills.reduce((s, b) => s + (parseFloat(b.totalCost) || 0), 0);
+            const secExpTurnover = secBills.reduce((s, b) => s + (parseFloat(b.totalExpected) || 0), 0);
+            const secExpProfit = secBills.reduce((s, b) => s + (parseFloat(b.profit) || 0), 0);
+            const secExpMargin = secExpTurnover > 0 ? ((secExpProfit / secExpTurnover) * 100).toFixed(1) : "0.0";
 
-        const tr = document.createElement("tr");
-        tr.style.cursor = "pointer";
-        tr.onclick = () => showCategory(key);
-        tr.innerHTML = `
-            <td><strong>${SECTION_CONFIG[key].name}</strong></td>
-            <td>${totalQty}</td>
-            <td>₹${totalBuy.toLocaleString('en-IN')}</td>
-            <td>₹${secSaleTurnover.toLocaleString('en-IN')}</td>
-            <td><span class="profit-badge ${secProfit < 0 ? 'profit-negative' : ''}">₹${secProfit.toLocaleString('en-IN')}</span></td>
-            <td><span class="margin-pill ${parseFloat(secMargin) >= 15 ? 'margin-high' : 'margin-medium'}">${secMargin}%</span></td>
-        `;
-        secSummaryBody.appendChild(tr);
-    });
+            const secSaleTurnover = secSales.reduce((s, sl) => s + (parseFloat(sl.saleAmount) || 0), 0);
+            const secCost = secSales.reduce((s, sl) => s + (parseFloat(sl.costPrice) || 0), 0);
+            const secProfit = secSaleTurnover - secCost;
+            const secMargin = secSaleTurnover > 0 ? ((secProfit / secSaleTurnover) * 100).toFixed(1) : "0.0";
+
+            const displayTurnover = secSaleTurnover > 0 ? secSaleTurnover : secExpTurnover;
+            const displayProfit = secSaleTurnover > 0 ? secProfit : secExpProfit;
+            const displayMargin = secSaleTurnover > 0 ? secMargin : secExpMargin;
+            const isExpected = secSaleTurnover === 0 && secExpTurnover > 0;
+
+            const tr = document.createElement("tr");
+            tr.style.cursor = "pointer";
+            tr.onclick = () => showCategory(key);
+            tr.innerHTML = `
+                <td><strong>${SECTION_CONFIG[key].name}</strong></td>
+                <td>${totalQty}</td>
+                <td>₹${totalBuy.toLocaleString('en-IN')}</td>
+                <td>
+                    ₹${displayTurnover.toLocaleString('en-IN')}
+                    ${isExpected ? '<small style="display:block; color:#64748b; font-size:11px;">(अपेक्षित विक्री)</small>' : ''}
+                </td>
+                <td>
+                    <span class="profit-badge ${displayProfit < 0 ? 'profit-negative' : ''}">₹${displayProfit.toLocaleString('en-IN')}</span>
+                    ${isExpected ? '<small style="display:block; color:#16a34a; font-size:11px;">(अपेक्षित नफा)</small>' : ''}
+                </td>
+                <td><span class="margin-pill ${parseFloat(displayMargin) >= 15 ? 'margin-high' : 'margin-medium'}">${displayMargin}%</span></td>
+            `;
+            secSummaryBody.appendChild(tr);
+        });
+    }
 
     // Recent 5 Bills Preview
     const recentBillsBody = document.getElementById("dashRecentBillsBody");
