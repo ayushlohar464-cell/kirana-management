@@ -21,6 +21,24 @@ const MONTH_NAMES_MR = [
     "सप्टेंबर (Sep)", "ऑक्टोबर (Oct)", "नोव्हेंबर (Nov)", "डिसेंबर (Dec)"
 ];
 
+// ==================== UNIT LABELS & FORMATTER ====================
+const UNIT_LABELS = {
+    box: "बॉक्स",
+    crate: "क्रेट",
+    carton: "कार्टन",
+    jar: "जार",
+    patti: "पट्टी",
+    bag: "पोते/बॅग",
+    piece: "नग",
+    kg: "किलो",
+    liter: "लिटर"
+};
+
+function formatUnitLabel(u) {
+    if (!u) return "बॉक्स";
+    return UNIT_LABELS[u] || u;
+}
+
 // ==================== DEFAULT SUPPLIERS ====================
 const DEFAULT_SUPPLIERS = [
     {
@@ -911,7 +929,7 @@ function searchCatalogItems(query) {
 
 function extractPcsFromTitle(title) {
     if (!title) return 1;
-    const m = title.match(/(\d+)\s*(?:बॉटल|नग|कॅन|पाकिट|पॅक|कप)/i);
+    const m = title.match(/(\d+)\s*(?:बॉटल|नग|कॅन|पाकिट|पॅक|कप|सॅशे|स्ट्रिप|गोळ्या|कँडी|जार|पट्टी|strips?|sachets?|pcs?|bottles?)/i);
     if (m) return parseInt(m[1], 10);
     return 1;
 }
@@ -1006,7 +1024,7 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
     const section = itemData ? (itemData.section || "kirana") : "kirana";
     const unit = itemData ? (itemData.unit || "box") : "box";
     const quantity = itemData ? (itemData.quantity || 1) : 1;
-    let pcsPerBox = itemData ? (itemData.pcsPerBox || extractPcsFromTitle(itemName) || (unit === 'box' || unit === 'crate' ? 24 : 1)) : (unit === 'box' || unit === 'crate' ? 24 : 1);
+    let pcsPerBox = itemData ? (itemData.pcsPerBox || extractPcsFromTitle(itemName) || (unit === 'patti' ? 16 : (unit === 'jar' ? 120 : (unit === 'box' || unit === 'crate' || unit === 'carton' ? 24 : 1)))) : (unit === 'patti' ? 16 : (unit === 'jar' ? 120 : (unit === 'box' || unit === 'crate' || unit === 'carton' ? 24 : 1)));
     const buyRate = itemData && itemData.buyRate !== undefined ? itemData.buyRate : "";
     const sellRate = itemData && itemData.sellRate !== undefined ? itemData.sellRate : "";
 
@@ -1032,6 +1050,8 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
                 <option value="box" ${unit === 'box' ? 'selected' : ''}>बॉक्स</option>
                 <option value="crate" ${unit === 'crate' ? 'selected' : ''}>क्रेट</option>
                 <option value="carton" ${unit === 'carton' ? 'selected' : ''}>कार्टन</option>
+                <option value="jar" ${unit === 'jar' ? 'selected' : ''}>जार</option>
+                <option value="patti" ${unit === 'patti' ? 'selected' : ''}>पट्टी</option>
                 <option value="bag" ${unit === 'bag' ? 'selected' : ''}>पोते/बॅग</option>
                 <option value="piece" ${unit === 'piece' ? 'selected' : ''}>नग</option>
                 <option value="kg" ${unit === 'kg' ? 'selected' : ''}>किलो</option>
@@ -1113,7 +1133,7 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
         if (item.section) secSelect.value = item.section;
         if (item.unit) unitSelect.value = item.unit;
         if (item.pcsPerBox) pcsInput.value = item.pcsPerBox;
-        else pcsInput.value = extractPcsFromTitle(item.itemName) || (item.unit === 'box' || item.unit === 'crate' ? 24 : 1);
+        else pcsInput.value = extractPcsFromTitle(item.itemName) || (item.unit === 'patti' ? 16 : (item.unit === 'jar' ? 120 : (item.unit === 'box' || item.unit === 'crate' || item.unit === 'carton' ? 24 : 1)));
         if (item.buyRate) buyInput.value = item.buyRate;
         if (item.sellRate) sellInput.value = item.sellRate;
         dropdown.style.display = "none";
@@ -1147,7 +1167,7 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
                 if (exact.section) secSelect.value = exact.section;
                 if (exact.unit) unitSelect.value = exact.unit;
                 if (exact.pcsPerBox) pcsInput.value = exact.pcsPerBox;
-                else pcsInput.value = extractPcsFromTitle(exact.itemName) || (exact.unit === 'box' || exact.unit === 'crate' ? 24 : 1);
+                else pcsInput.value = extractPcsFromTitle(exact.itemName) || (exact.unit === 'patti' ? 16 : (exact.unit === 'jar' ? 120 : (exact.unit === 'box' || exact.unit === 'crate' || exact.unit === 'carton' ? 24 : 1)));
                 if (exact.buyRate && !buyInput.value) buyInput.value = exact.buyRate;
                 if (exact.sellRate && !sellInput.value) sellInput.value = exact.sellRate;
                 calculateMultiItemBillLive();
@@ -1158,6 +1178,10 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
     unitSelect.addEventListener("change", () => {
         if (unitSelect.value === "piece" || unitSelect.value === "kg" || unitSelect.value === "liter") {
             pcsInput.value = 1;
+        } else if (unitSelect.value === "patti") {
+            pcsInput.value = extractPcsFromTitle(nameInput.value) || 16;
+        } else if (unitSelect.value === "jar") {
+            pcsInput.value = extractPcsFromTitle(nameInput.value) || 120;
         } else if (pcsInput.value == 1) {
             pcsInput.value = extractPcsFromTitle(nameInput.value) || 24;
         }
@@ -1636,7 +1660,7 @@ function downloadSupplierReportExcel(encodedName) {
                 <td class="text-center"><strong>${b.billNumber}</strong></td>
                 <td class="text-left">${SECTION_CONFIG[b.section]?.name || b.section}</td>
                 <td class="text-left"><strong>${b.itemName}</strong></td>
-                <td class="text-center">${b.quantity} ${b.unit}</td>
+                <td class="text-center">${b.quantity} ${formatUnitLabel(b.unit)}</td>
                 <td class="text-right">₹${parseFloat(b.buyRate).toFixed(2)}</td>
                 <td class="text-right cost-cell">₹${buy.toFixed(2)}</td>
                 <td class="text-right">₹${parseFloat(b.sellRate).toFixed(2)}</td>
@@ -1759,7 +1783,7 @@ function downloadSupplierReportCSV(encodedName) {
             SECTION_CONFIG[b.section]?.name || b.section,
             b.itemName,
             b.quantity,
-            b.unit,
+            formatUnitLabel(b.unit),
             b.buyRate,
             buy.toFixed(2),
             b.sellRate,
@@ -1902,7 +1926,7 @@ function downloadBillsExcel() {
                 <td class="text-center">${b.billNumber}</td>
                 <td class="text-left">${SECTION_CONFIG[b.section]?.name || b.section}</td>
                 <td class="text-left"><strong>${b.itemName}</strong></td>
-                <td class="text-center">${b.quantity} ${b.unit}</td>
+                <td class="text-center">${b.quantity} ${formatUnitLabel(b.unit)}</td>
                 <td class="text-right">₹${parseFloat(b.buyRate).toFixed(2)}</td>
                 <td class="text-right cost-cell">₹${buy.toFixed(2)}</td>
                 <td class="text-right">₹${parseFloat(b.sellRate).toFixed(2)}</td>
@@ -2000,7 +2024,7 @@ function downloadBillsCSV() {
             SECTION_CONFIG[b.section]?.name || b.section,
             b.itemName,
             b.quantity,
-            b.unit,
+            formatUnitLabel(b.unit),
             b.buyRate,
             parseFloat(b.totalCost).toFixed(2),
             b.sellRate,
@@ -2507,7 +2531,7 @@ function renderDashboard() {
             <td><small>${b.billNumber}</small></td>
             <td>${SECTION_CONFIG[b.section]?.name || b.section}</td>
             <td>${b.itemName}</td>
-            <td>${b.quantity} ${b.unit}</td>
+            <td>${b.quantity} ${formatUnitLabel(b.unit)}</td>
             <td>₹${b.totalCost.toLocaleString('en-IN')}</td>
             <td>₹${b.totalExpected.toLocaleString('en-IN')}</td>
             <td><span class="profit-badge">₹${b.profit.toLocaleString('en-IN')}</span></td>
@@ -2647,7 +2671,7 @@ function renderLineItemsTable(filtered) {
             <td><small>${b.billNumber}</small></td>
             <td>${SECTION_CONFIG[b.section]?.name || b.section}</td>
             <td><strong>${b.itemName}</strong></td>
-            <td>${b.quantity} ${b.unit}</td>
+            <td>${b.quantity} ${formatUnitLabel(b.unit)}</td>
             <td>₹${b.buyRate}</td>
             <td style="color:#dc2626; font-weight:600;">₹${parseFloat(b.totalCost).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
             <td>₹${b.sellRate}</td>
@@ -2709,7 +2733,7 @@ function openInvoiceDetailsModal(encodedKey) {
             <td style="text-align:center;">${idx + 1}</td>
             <td><strong>${b.itemName}</strong></td>
             <td>${SECTION_CONFIG[b.section]?.name || b.section}</td>
-            <td style="text-align:center;">${b.quantity} ${b.unit}</td>
+            <td style="text-align:center;">${b.quantity} ${formatUnitLabel(b.unit)}</td>
             <td style="text-align:right;">₹${parseFloat(b.buyRate).toFixed(2)}</td>
             <td style="text-align:right; color:#dc2626; font-weight:600;">₹${parseFloat(b.totalCost).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
             <td style="text-align:right;">₹${parseFloat(b.sellRate).toFixed(2)}</td>
@@ -2783,7 +2807,7 @@ function downloadSingleInvoiceExcel(encodedKey) {
                 <td class="text-center">${idx + 1}</td>
                 <td class="text-left"><strong>${b.itemName}</strong></td>
                 <td class="text-left">${SECTION_CONFIG[b.section]?.name || b.section}</td>
-                <td class="text-center">${b.quantity} ${b.unit}</td>
+                <td class="text-center">${b.quantity} ${formatUnitLabel(b.unit)}</td>
                 <td class="text-right">₹${parseFloat(b.buyRate).toFixed(2)}</td>
                 <td class="text-right cost-cell">₹${buy.toFixed(2)}</td>
                 <td class="text-right">₹${parseFloat(b.sellRate).toFixed(2)}</td>
@@ -2931,7 +2955,7 @@ function renderCategoryDetail(catKey) {
             <td><strong>${b.supplier}</strong></td>
             <td><small>${b.billNumber}</small></td>
             <td>${b.itemName}</td>
-            <td>${b.quantity} ${b.unit}</td>
+            <td>${b.quantity} ${formatUnitLabel(b.unit)}</td>
             <td>₹${b.totalCost.toLocaleString('en-IN')} <small>(@₹${b.buyRate})</small></td>
             <td>₹${b.totalExpected.toLocaleString('en-IN')} <small>(@₹${b.sellRate})</small></td>
             <td><span class="profit-badge">₹${b.profit.toLocaleString('en-IN')}</span></td>
@@ -3558,9 +3582,20 @@ function closeAddItemModal() {
 function toggleCustomItemBoxFields() {
     const unit = document.getElementById("customItemUnit")?.value || "box";
     const pcsInp = document.getElementById("customItemPcs");
+    const pcsLabel = document.getElementById("customItemPcsLabel");
+    const buyLabel = document.getElementById("customItemBuyRateLabel");
+
+    const uName = formatUnitLabel(unit);
+    if (pcsLabel) pcsLabel.innerText = `🔢 १ ${uName}मध्ये किती नग? (Pcs/${uName})`;
+    if (buyLabel) buyLabel.innerText = `💵 १ ${uName} खरेदी दर (₹)`;
+
     if (pcsInp) {
         if (unit === "piece" || unit === "kg" || unit === "liter") {
             pcsInp.value = 1;
+        } else if (unit === "patti") {
+            if (pcsInp.value == 1 || pcsInp.value == 24 || pcsInp.value == 120) pcsInp.value = 16;
+        } else if (unit === "jar") {
+            if (pcsInp.value == 1 || pcsInp.value == 24 || pcsInp.value == 16) pcsInp.value = 120;
         } else if (pcsInp.value == 1) {
             pcsInp.value = 24;
         }
@@ -3715,7 +3750,7 @@ function renderMasterCatalogTable() {
                     ${isCustom ? '<span style="background:#e0e7ff; color:#3730a3; font-size:10.5px; padding:2px 6px; border-radius:10px; margin-left:6px; font-weight:700;">तुमचा माल</span>' : ''}
                 </td>
                 <td>${SECTION_CONFIG[it.section]?.name || it.section}</td>
-                <td>${it.unit || 'बॉक्स'}</td>
+                <td>${formatUnitLabel(it.unit)}</td>
                 <td style="text-align:right; font-weight:700; color:#0f172a;">${pcs} नग</td>
                 <td style="text-align:right;">₹${buy.toFixed(2)}</td>
                 <td style="text-align:right; color:#64748b; font-size:12.5px;">₹${costPerPcs.toFixed(2)}</td>

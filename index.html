@@ -6,7 +6,7 @@
     <title>🏪 पूनम किराणा - सप्लायर बिल व नफा व्यवस्थापन</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.2">
+    <link rel="stylesheet" href="style.css?v=2.3">
     <!-- Chart.js for 1 Year Monthly & Yearly Profit Report -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google Firebase SDK (Compat) for Real-time Mobile & Laptop Sync -->
@@ -875,6 +875,8 @@
                             <option value="box" selected>बॉक्स</option>
                             <option value="crate">क्रेट</option>
                             <option value="carton">कार्टन</option>
+                            <option value="jar">जार</option>
+                            <option value="patti">पट्टी</option>
                             <option value="bag">पोते/बॅग</option>
                             <option value="piece">नग</option>
                             <option value="kg">किलो</option>
@@ -885,11 +887,11 @@
 
                 <div class="form-row" style="display:flex; gap:10px;">
                     <div class="form-group" style="flex:1;">
-                        <label>🔢 १ बॉक्समध्ये किती नग? (Pcs/Box)</label>
+                        <label id="customItemPcsLabel">🔢 १ बॉक्समध्ये किती नग? (Pcs/Box)</label>
                         <input type="number" id="customItemPcs" min="1" step="1" value="24" oninput="calculateCustomItemModalPreview()" placeholder="उदा. 24" required>
                     </div>
                     <div class="form-group" style="flex:1;">
-                        <label>💵 १ बॉक्स खरेदी दर (₹)</label>
+                        <label id="customItemBuyRateLabel">💵 १ बॉक्स खरेदी दर (₹)</label>
                         <input type="number" id="customItemBuyRate" min="0" step="0.01" value="1200" oninput="calculateCustomItemModalPreview()" placeholder="उदा. 1200" required>
                     </div>
                 </div>
@@ -987,6 +989,6 @@
     <!-- TOAST NOTIFICATION -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=2.2"></script>
+    <script src="app.js?v=2.3"></script>
 </body>
 </html>
