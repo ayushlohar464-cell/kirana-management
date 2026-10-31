@@ -74,62 +74,83 @@ const DEFAULT_SUPPLIERS = [
     }
 ];
 
+// ==================== MASTER COLDDRINKS & KIRANA CATALOGS (एकच क्लिकवर सर्व माल लोड करणे) ====================
+const MASTER_COLDDRINKS_CATALOG = [
+    { itemName: "Sprite (स्प्राइट) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 10 },
+    { itemName: "Thums Up (थम्स अप) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 15 },
+    { itemName: "Coca Cola (कोका कोला) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 10 },
+    { itemName: "Maaza (माझा) 600ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 912, quantity: 12 },
+    { itemName: "Sting Energy (स्टिंग) 250ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 480, sellRate: 600, quantity: 15 },
+    { itemName: "Frooti (फ्रुटी) 200ml टेट्रा (40 नग बॉक्स)", section: "colddrinks", unit: "box", buyRate: 460, sellRate: 600, quantity: 12 },
+    { itemName: "Appy Fizz (ॲप्पी फिज) 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 450, sellRate: 600, quantity: 10 },
+    { itemName: "Mountain Dew (माउंटन ड्यु) 750ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 8 },
+    { itemName: "7-Up (7-अप) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Pepsi (पेप्सी) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 8 },
+    { itemName: "Mirinda (मिरिंडा) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Limca (लिम्का) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Fanta (फँटा) 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
+    { itemName: "Kinley Soda (किन्ले सोडा) 750ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 360, sellRate: 480, quantity: 10 },
+    { itemName: "Kinley Water (किन्ले पाणी) 1L (12 बॉटल)", section: "colddrinks", unit: "box", buyRate: 140, sellRate: 240, quantity: 15 },
+    { itemName: "Red Bull (रेड बुल) 250ml कॅन (24 कॅन)", section: "colddrinks", unit: "box", buyRate: 2650, sellRate: 3000, quantity: 2 },
+    { itemName: "Jeera Masala Soda (जिरा मसाला सोडा) 200ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 200, sellRate: 288, quantity: 8 },
+    { itemName: "Sprite 250ml Can (स्प्राइट कॅन 24 नग)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 5 },
+    { itemName: "Thums Up 250ml Can (थम्स अप कॅन 24 नग)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 5 },
+    { itemName: "Coca Cola 250ml Can (कोका कोला कॅन 24 नग)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 4 },
+    { itemName: "Maaza 1.2L (माझा मोठी बॉटल 12 बॉटल)", section: "colddrinks", unit: "box", buyRate: 660, sellRate: 840, quantity: 8 },
+    { itemName: "Sprite 2.25L (स्प्राइट मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 855, quantity: 6 },
+    { itemName: "Thums Up 2.25L (थम्स अप मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 855, quantity: 6 },
+    { itemName: "Coca Cola 2.25L (कोका कोला मोठी बॉटल 9 बॉटल)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 855, quantity: 5 },
+    { itemName: "Bovonto Grape Soda (बोव्होंटो) 250ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 360, sellRate: 480, quantity: 4 },
+    { itemName: "Paper Boat Mango (पेपर बोट) 200ml (24 पॅक)", section: "colddrinks", unit: "box", buyRate: 600, sellRate: 720, quantity: 4 }
+];
+
+const MASTER_KIRANA_CATALOG = [
+    { itemName: "Fortune Oil (फॉर्च्युन सोयाबीन तेल) 1L (12 नग)", section: "kirana", unit: "box", buyRate: 1296, sellRate: 1440, quantity: 20 },
+    { itemName: "Gemini Oil (जेमिनी सोयाबीन तेल) 1L (12 नग)", section: "kirana", unit: "box", buyRate: 1320, sellRate: 1460, quantity: 15 },
+    { itemName: "Dhara Groundnut Oil (धारा शेंगदाणा तेल) 1L (12 नग)", section: "kirana", unit: "box", buyRate: 1850, sellRate: 2040, quantity: 10 },
+    { itemName: "M 30 Sugar (साखर एम ३०) 50kg पोते", section: "kirana", unit: "bag", buyRate: 1900, sellRate: 2100, quantity: 10 },
+    { itemName: "S 30 Sugar (साखर एस ३० बारीक) 50kg पोते", section: "kirana", unit: "bag", buyRate: 1920, sellRate: 2120, quantity: 5 },
+    { itemName: "Toor Dal (तूर डाळ उत्तम) 50kg पोते", section: "kirana", unit: "bag", buyRate: 6750, sellRate: 7750, quantity: 4 },
+    { itemName: "Moong Dal (मूग डाळ पिवळी) 30kg पोते", section: "kirana", unit: "bag", buyRate: 3450, sellRate: 3900, quantity: 3 },
+    { itemName: "Chana Dal (चणा डाळ उत्तम) 30kg पोते", section: "kirana", unit: "bag", buyRate: 2550, sellRate: 2850, quantity: 4 },
+    { itemName: "Urad Dal (उडीद डाळ मोगर) 30kg पोते", section: "kirana", unit: "bag", buyRate: 3600, sellRate: 4050, quantity: 2 },
+    { itemName: "Masoor Dal (मसूर डाळ उत्तम) 30kg पोते", section: "kirana", unit: "bag", buyRate: 2400, sellRate: 2700, quantity: 3 },
+    { itemName: "Matki (मटकी गावरान) 25kg पोते", section: "kirana", unit: "bag", buyRate: 2750, sellRate: 3125, quantity: 2 },
+    { itemName: "Chole (काबुली चणे) 25kg पोते", section: "kirana", unit: "bag", buyRate: 3250, sellRate: 3750, quantity: 2 },
+    { itemName: "Harbhara (हरभरा गावठी) 50kg पोते", section: "kirana", unit: "bag", buyRate: 3500, sellRate: 4000, quantity: 2 },
+    { itemName: "Sharbati Wheat (गहू शरबती एमपी) 50kg पोते", section: "kirana", unit: "bag", buyRate: 1950, sellRate: 2250, quantity: 8 },
+    { itemName: "Lokwan Wheat (गहू सिहोर लोकवान) 50kg पोते", section: "kirana", unit: "bag", buyRate: 1800, sellRate: 2050, quantity: 8 },
+    { itemName: "Jowar Maldandi (ज्वारी मालदांडी) 50kg पोते", section: "kirana", unit: "bag", buyRate: 2450, sellRate: 2800, quantity: 5 },
+    { itemName: "Bajra (बाजरी गावरान) 50kg पोते", section: "kirana", unit: "bag", buyRate: 1450, sellRate: 1700, quantity: 4 },
+    { itemName: "Basmati Rice (बासमती तुकडा तांदूळ) 25kg बॅग", section: "kirana", unit: "bag", buyRate: 1400, sellRate: 1650, quantity: 6 },
+    { itemName: "Kolam Rice (कोलम तांदूळ उत्तम) 50kg पोते", section: "kirana", unit: "bag", buyRate: 2750, sellRate: 3150, quantity: 5 },
+    { itemName: "Indrayani Rice (इंद्रायणी तांदूळ जुना) 50kg पोते", section: "kirana", unit: "bag", buyRate: 3200, sellRate: 3650, quantity: 4 },
+    { itemName: "Besan (बेसन उत्तम) 500g (20 पाकिट बॉक्स)", section: "kirana", unit: "box", buyRate: 880, sellRate: 1000, quantity: 5 },
+    { itemName: "Rava (रवा उत्तम) 500g (20 पाकिट बॉक्स)", section: "kirana", unit: "box", buyRate: 520, sellRate: 600, quantity: 4 },
+    { itemName: "Maida (मैदा उत्तम) 500g (20 पाकिट बॉक्स)", section: "kirana", unit: "box", buyRate: 520, sellRate: 600, quantity: 4 },
+    { itemName: "Poha (पोहे जाडे) 500g (20 पाकिट)", section: "kirana", unit: "box", buyRate: 560, sellRate: 660, quantity: 5 },
+    { itemName: "Sabudana (साबुदाणा उत्तम) 25kg पोते", section: "kirana", unit: "bag", buyRate: 1750, sellRate: 2000, quantity: 3 },
+    { itemName: "Groundnut (शेंगदाणे उत्तम) 50kg पोते", section: "kirana", unit: "bag", buyRate: 5500, sellRate: 6250, quantity: 2 },
+    { itemName: "Tata Salt (टाटा सॉल्ट मीठ) 1kg (25 नग पोते)", section: "kirana", unit: "bag", buyRate: 625, sellRate: 700, quantity: 4 },
+    { itemName: "Jaggery (गूळ कोल्हापुरी पिवळा) 10kg बॉक्स", section: "kirana", unit: "box", buyRate: 460, sellRate: 540, quantity: 6 }
+];
+
 // ==================== DEFAULT SUPPLIER CATALOGS (४०-५० आयटम्स लोड करण्यासाठी) ====================
 const DEFAULT_SUPPLIER_CATALOG = {
-    "कोका कोला बेव्हरेजेस एजन्सी": [
-        { itemName: "थम्प्स अप 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 15 },
-        { itemName: "स्प्राइट 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 10 },
-        { itemName: "कोका कोला 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 10 },
-        { itemName: "माझा 600ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 912, quantity: 12 },
-        { itemName: "माझा 1.2 लिटर (12 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 660, sellRate: 840, quantity: 8 },
-        { itemName: "लिम्का 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
-        { itemName: "फँटा 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 },
-        { itemName: "किन्ले सोडा 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 360, sellRate: 480, quantity: 10 },
-        { itemName: "किन्ले पाणी 1L (12 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 140, sellRate: 240, quantity: 15 },
-        { itemName: "थम्प्स अप 250ml कॅन (24 कॅन)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 5 },
-        { itemName: "स्प्राइट 250ml कॅन (24 कॅन)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 960, quantity: 5 },
-        { itemName: "स्टिंग 250ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 480, sellRate: 600, quantity: 12 },
-        { itemName: "माउंटन ड्यु 750ml (24 बॉटल)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 8 },
-        { itemName: "पेप्सी 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 8 },
-        { itemName: "7-अप 750ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 768, sellRate: 960, quantity: 6 }
-    ],
+    "कोका कोला बेव्हरेजेस एजन्सी": MASTER_COLDDRINKS_CATALOG.filter(it => it.section === "colddrinks"),
     "पार्ले ऍग्रो सप्लायर्स": [
-        { itemName: "फ्रुटी 200ml टेट्रा (40 नग बॉक्स)", section: "colddrinks", unit: "box", buyRate: 460, sellRate: 600, quantity: 12 },
-        { itemName: "फ्रुटी 600ml पेट (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 912, quantity: 8 },
-        { itemName: "ॲप्पी फिज 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 450, sellRate: 600, quantity: 10 },
-        { itemName: "ॲप्पी फिज 600ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 780, sellRate: 960, quantity: 6 },
-        { itemName: "बी-फिझ 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 450, sellRate: 600, quantity: 5 },
-        { itemName: "स्मुथ 85ml टेट्रा (40 नग)", section: "colddrinks", unit: "box", buyRate: 340, sellRate: 400, quantity: 8 },
-        { itemName: "पारले-जी बिस्किट 5/- (96 पाकिट बॉक्स)", section: "snacks", unit: "box", buyRate: 410, sellRate: 480, quantity: 10 },
-        { itemName: "पारले २०-२० बिस्किट 10/- (48 पाकिट)", section: "snacks", unit: "box", buyRate: 410, sellRate: 480, quantity: 8 },
-        { itemName: "पारले हायड अँड सीक 30/- (24 पाकिट)", section: "snacks", unit: "box", buyRate: 620, sellRate: 720, quantity: 5 },
-        { itemName: "पारले क्रॅकजॅक 10/- (48 पाकिट)", section: "snacks", unit: "box", buyRate: 410, sellRate: 480, quantity: 6 }
+        { itemName: "Frooti (फ्रुटी) 200ml टेट्रा (40 नग बॉक्स)", section: "colddrinks", unit: "box", buyRate: 460, sellRate: 600, quantity: 12 },
+        { itemName: "Frooti (फ्रुटी) 600ml पेट (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 720, sellRate: 912, quantity: 8 },
+        { itemName: "Appy Fizz (ॲप्पी फिज) 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 450, sellRate: 600, quantity: 10 },
+        { itemName: "Appy Fizz (ॲप्पी फिज) 600ml (24 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 780, sellRate: 960, quantity: 6 },
+        { itemName: "B-Fizz (बी-फिझ) 160ml (30 बॉटल बॉक्स)", section: "colddrinks", unit: "box", buyRate: 450, sellRate: 600, quantity: 5 },
+        { itemName: "Smoodh (स्मुथ) 85ml टेट्रा (40 नग)", section: "colddrinks", unit: "box", buyRate: 340, sellRate: 400, quantity: 8 },
+        { itemName: "Parle-G (पारले-जी) 5/- (96 पाकिट बॉक्स)", section: "snacks", unit: "box", buyRate: 410, sellRate: 480, quantity: 10 },
+        { itemName: "Parle 20-20 (पारले २०-२०) 10/- (48 पाकिट)", section: "snacks", unit: "box", buyRate: 410, sellRate: 480, quantity: 8 },
+        { itemName: "Parle Hide & Seek (हायड अँड सीक) 30/- (24 पाकिट)", section: "snacks", unit: "box", buyRate: 620, sellRate: 720, quantity: 5 },
+        { itemName: "Parle Monaco (मोनाको) 10/- (48 पाकिट)", section: "snacks", unit: "box", buyRate: 410, sellRate: 480, quantity: 6 }
     ],
-    "श्री गणेश ट्रेडिंग कंपनी (मार्केट यार्ड)": [
-        { itemName: "फॉर्च्युन सोयाबीन तेल 1L (12 नग बॉक्स)", section: "kirana", unit: "box", buyRate: 1296, sellRate: 1440, quantity: 20 },
-        { itemName: "जेमिनी सोयाबीन तेल 1L (12 नग बॉक्स)", section: "kirana", unit: "box", buyRate: 1320, sellRate: 1460, quantity: 15 },
-        { itemName: "धारा शेंगदाणा तेल 1L (12 नग बॉक्स)", section: "kirana", unit: "box", buyRate: 1850, sellRate: 2040, quantity: 10 },
-        { itemName: "तूर डाळ उत्तम (50kg पोते)", section: "kirana", unit: "bag", buyRate: 6750, sellRate: 7750, quantity: 4 },
-        { itemName: "मूग डाळ पिवळी (30kg पोते)", section: "kirana", unit: "bag", buyRate: 3450, sellRate: 3900, quantity: 3 },
-        { itemName: "चणा डाळ उत्तम (30kg पोते)", section: "kirana", unit: "bag", buyRate: 2550, sellRate: 2850, quantity: 4 },
-        { itemName: "उडीद डाळ मोगर (30kg पोते)", section: "kirana", unit: "bag", buyRate: 3600, sellRate: 4050, quantity: 2 },
-        { itemName: "मसूर डाळ उत्तम (30kg पोते)", section: "kirana", unit: "bag", buyRate: 2400, sellRate: 2700, quantity: 3 },
-        { itemName: "मटकी गावरान (25kg पोते)", section: "kirana", unit: "bag", buyRate: 2750, sellRate: 3125, quantity: 2 },
-        { itemName: "छोले / काबुली चणे (25kg पोते)", section: "kirana", unit: "bag", buyRate: 3250, sellRate: 3750, quantity: 2 },
-        { itemName: "हरभरा गावठी (50kg पोते)", section: "kirana", unit: "bag", buyRate: 3500, sellRate: 4000, quantity: 2 },
-        { itemName: "बासमती तुकडा तांदूळ (25kg बॅग)", section: "kirana", unit: "bag", buyRate: 1400, sellRate: 1650, quantity: 6 },
-        { itemName: "कोलम तांदूळ उत्तम (50kg पोते)", section: "kirana", unit: "bag", buyRate: 2750, sellRate: 3150, quantity: 5 },
-        { itemName: "इंद्रायणी तांदूळ जुना (50kg पोते)", section: "kirana", unit: "bag", buyRate: 3200, sellRate: 3650, quantity: 4 },
-        { itemName: "वाडा कोलम तांदूळ (50kg पोते)", section: "kirana", unit: "bag", buyRate: 3100, sellRate: 3550, quantity: 3 },
-        { itemName: "बेसन 500g (20 पाकिट बॉक्स)", section: "kirana", unit: "box", buyRate: 880, sellRate: 1000, quantity: 5 },
-        { itemName: "रवा उत्तम 500g (20 पाकिट बॉक्स)", section: "kirana", unit: "box", buyRate: 520, sellRate: 600, quantity: 4 },
-        { itemName: "मैदा 500g (20 पाकिट बॉक्स)", section: "kirana", unit: "box", buyRate: 520, sellRate: 600, quantity: 4 },
-        { itemName: "पोहे जाडे उत्तम 500g (20 पाकिट)", section: "kirana", unit: "box", buyRate: 560, sellRate: 660, quantity: 5 },
-        { itemName: "साबुदाणा उत्तम (25kg पोते)", section: "kirana", unit: "bag", buyRate: 1750, sellRate: 2000, quantity: 3 },
-        { itemName: "शेंगदाणे उत्तम (50kg पोते)", section: "kirana", unit: "bag", buyRate: 5500, sellRate: 6250, quantity: 2 },
-        { itemName: "गूळ कोल्हापुरी पिवळा (10kg बॉक्स)", section: "kirana", unit: "box", buyRate: 460, sellRate: 540, quantity: 6 },
-        { itemName: "मीठ टाटा सॉल्ट 1kg (25 नग पोते)", section: "kirana", unit: "bag", buyRate: 625, sellRate: 700, quantity: 4 }
-    ],
+    "श्री गणेश ट्रेडिंग कंपनी (मार्केट यार्ड)": MASTER_KIRANA_CATALOG,
     "सह्याद्री ऍग्रो फूड्स": [
         { itemName: "एम 30 साखर (50kg पोते)", section: "kirana", unit: "bag", buyRate: 1900, sellRate: 2100, quantity: 10 },
         { itemName: "एस 30 साखर बारीक (50kg पोते)", section: "kirana", unit: "bag", buyRate: 1920, sellRate: 2120, quantity: 5 },
@@ -800,6 +821,118 @@ function onSupplierSelected() {
     }
 }
 
+// ==================== REAL-TIME INTELLIGENT SEARCH (sp -> Sprite, th -> Thums Up) ====================
+function searchCatalogItems(query) {
+    if (!query) return [];
+    const q = query.trim().toLowerCase();
+    if (q.length === 0) return [];
+
+    const itemsMap = new Map();
+
+    function addList(list) {
+        if (!list) return;
+        list.forEach(it => {
+            if (!it || !it.itemName) return;
+            const key = it.itemName.toLowerCase();
+            if (!itemsMap.has(key)) {
+                itemsMap.set(key, { ...it });
+            }
+        });
+    }
+
+    // 1. Current supplier catalog & past bills
+    const suppSelect = document.getElementById("billSupplierSelect");
+    if (suppSelect && suppSelect.value) {
+        addList(getSupplierCatalogItems(suppSelect.value));
+    }
+
+    // 2. All master catalogs (Cold drinks, Kirana, Spices, Snacks)
+    addList(MASTER_COLDDRINKS_CATALOG);
+    addList(MASTER_KIRANA_CATALOG);
+    Object.values(DEFAULT_SUPPLIER_CATALOG).forEach(list => addList(list));
+
+    const all = Array.from(itemsMap.values());
+
+    // Search by prefix, word match, or substring
+    return all.filter(it => {
+        const name = it.itemName.toLowerCase();
+
+        // 1. Exact start or substring
+        if (name.includes(q)) return true;
+
+        // 2. Word start match (e.g. 'sp' matches 'Sprite', 'th' matches 'Thums Up')
+        const words = name.split(/[\s\(\)\[\]\-\/,\.]+/).filter(w => w.length > 0);
+        if (words.some(w => w.startsWith(q))) return true;
+
+        // 3. Short aliases
+        if (q === "sp" && name.includes("sprite")) return true;
+        if (q === "th" && name.includes("thums")) return true;
+        if (q === "st" && name.includes("sting")) return true;
+        if (q === "ma" && name.includes("maaza")) return true;
+        if (q === "fr" && name.includes("frooti")) return true;
+        if (q === "ap" && name.includes("appy")) return true;
+        if (q === "co" && (name.includes("coca") || name.includes("cola"))) return true;
+        if (q === "pe" && name.includes("pepsi")) return true;
+        if (q === "de" && name.includes("dew")) return true;
+        if (q === "li" && name.includes("limca")) return true;
+        if (q === "fa" && name.includes("fanta")) return true;
+        if (q === "ki" && name.includes("kinley")) return true;
+        if (q === "re" && name.includes("red bull")) return true;
+        if (q === "je" && name.includes("jeera")) return true;
+        if (q === "bo" && name.includes("bovonto")) return true;
+        if (q === "pa" && (name.includes("parle") || name.includes("paper"))) return true;
+
+        return false;
+    }).slice(0, 15);
+}
+
+// 1-Click Batch Loader for Categories (सर्व कोल्ड ड्रिंक्स / किराणा एकदम लोड करा)
+function loadMasterCategoryItems(categoryKey) {
+    const tbody = document.getElementById("billItemsTableBody");
+    if (!tbody) return;
+
+    let itemsToLoad = [];
+    let catTitle = "";
+
+    if (categoryKey === "colddrinks") {
+        itemsToLoad = MASTER_COLDDRINKS_CATALOG;
+        catTitle = "कोल्ड ड्रिंक्स (Sprite, Thums Up, Maaza, इत्यादी)";
+
+        const suppSelect = document.getElementById("billSupplierSelect");
+        if (suppSelect && !suppSelect.value) {
+            const coldSupp = suppliers.find(s => s.section === "colddrinks");
+            if (coldSupp) {
+                suppSelect.value = coldSupp.name;
+                onSupplierSelected();
+            }
+        }
+    } else if (categoryKey === "kirana") {
+        itemsToLoad = MASTER_KIRANA_CATALOG;
+        catTitle = "किराणा माल (तेल, डाळी, साखर, तांदूळ, इत्यादी)";
+
+        const suppSelect = document.getElementById("billSupplierSelect");
+        if (suppSelect && !suppSelect.value) {
+            const kiranaSupp = suppliers.find(s => s.section === "kirana");
+            if (kiranaSupp) {
+                suppSelect.value = kiranaSupp.name;
+                onSupplierSelected();
+            }
+        }
+    }
+
+    if (itemsToLoad.length === 0) return;
+
+    tbody.innerHTML = "";
+    itemsToLoad.forEach(it => {
+        addBillItemRow(it, false);
+    });
+
+    renumberBillItemRows();
+    calculateMultiItemBillLive();
+
+    showToast(`🥤 सर्व ${itemsToLoad.length} ${catTitle} एका सेकंदात लोड झाले!`);
+}
+
 function loadSupplierItems(showNotification = true) {
     const billSelect = document.getElementById("billSupplierSelect");
     const suppName = billSelect ? billSelect.value.trim() : "";
@@ -848,8 +981,9 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
 
     tr.innerHTML = `
         <td class="item-num-cell">${rowIdx}</td>
-        <td>
-            <input type="text" list="supplierItemsDatalist" class="item-name-input" placeholder="मालाचे नाव टाका" value="${itemName}" required>
+        <td class="item-name-cell">
+            <input type="text" list="supplierItemsDatalist" class="item-name-input" placeholder="उदा. Sprite किंवा sp किंवा थम्स अप" value="${itemName}" autocomplete="off" required>
+            <div class="item-autocomplete-dropdown" style="display:none;"></div>
         </td>
         <td>
             <select class="item-section-select">
@@ -891,24 +1025,88 @@ function addBillItemRow(itemData = null, shouldFocus = true) {
     `;
 
     const nameInput = tr.querySelector(".item-name-input");
+    const dropdown = tr.querySelector(".item-autocomplete-dropdown");
     const secSelect = tr.querySelector(".item-section-select");
     const unitSelect = tr.querySelector(".item-unit-select");
     const qtyInput = tr.querySelector(".item-qty-input");
     const buyInput = tr.querySelector(".item-buy-input");
     const sellInput = tr.querySelector(".item-sell-input");
 
-    // Autocomplete fill when typing or selecting from datalist
+    function renderSuggestions(query) {
+        if (!query || query.trim().length === 0) {
+            dropdown.style.display = "none";
+            dropdown.innerHTML = "";
+            return;
+        }
+
+        const matches = searchCatalogItems(query);
+        if (matches.length === 0) {
+            dropdown.style.display = "none";
+            return;
+        }
+
+        dropdown.innerHTML = "";
+        matches.forEach(m => {
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "autocomplete-item";
+            itemDiv.innerHTML = `
+                <div class="autocomplete-item-title">${m.itemName}</div>
+                <div class="autocomplete-item-sub">
+                    ${SECTION_CONFIG[m.section]?.name || m.section} | खरेदी: ₹${m.buyRate} | विक्री: ₹${m.sellRate}
+                </div>
+            `;
+
+            itemDiv.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                selectSuggestion(m);
+            });
+
+            dropdown.appendChild(itemDiv);
+        });
+
+        dropdown.style.display = "block";
+    }
+
+    function selectSuggestion(item) {
+        nameInput.value = item.itemName;
+        if (item.section) secSelect.value = item.section;
+        if (item.unit) unitSelect.value = item.unit;
+        if (item.buyRate) buyInput.value = item.buyRate;
+        if (item.sellRate) sellInput.value = item.sellRate;
+        dropdown.style.display = "none";
+        calculateMultiItemBillLive();
+        qtyInput.focus();
+    }
+
+    // Live typing autocomplete (sp -> Sprite, th -> Thums Up)
+    nameInput.addEventListener("input", () => {
+        renderSuggestions(nameInput.value);
+    });
+
+    nameInput.addEventListener("focus", () => {
+        if (nameInput.value.trim().length > 0) {
+            renderSuggestions(nameInput.value);
+        }
+    });
+
+    nameInput.addEventListener("blur", () => {
+        setTimeout(() => {
+            dropdown.style.display = "none";
+        }, 220);
+    });
+
     nameInput.addEventListener("change", () => {
         const typedVal = nameInput.value.trim().toLowerCase();
-        const suppName = document.getElementById("billSupplierSelect")?.value;
-        const catalogItems = getSupplierCatalogItems(suppName);
-        const match = catalogItems.find(c => c.itemName.toLowerCase() === typedVal);
-        if (match) {
-            if (match.section) secSelect.value = match.section;
-            if (match.unit) unitSelect.value = match.unit;
-            if (match.buyRate && !buyInput.value) buyInput.value = match.buyRate;
-            if (match.sellRate && !sellInput.value) sellInput.value = match.sellRate;
-            calculateMultiItemBillLive();
+        const matches = searchCatalogItems(typedVal);
+        if (matches.length > 0) {
+            const exact = matches.find(m => m.itemName.toLowerCase() === typedVal) || matches[0];
+            if (exact && (!buyInput.value || !sellInput.value)) {
+                if (exact.section) secSelect.value = exact.section;
+                if (exact.unit) unitSelect.value = exact.unit;
+                if (exact.buyRate && !buyInput.value) buyInput.value = exact.buyRate;
+                if (exact.sellRate && !sellInput.value) sellInput.value = exact.sellRate;
+                calculateMultiItemBillLive();
+            }
         }
     });
 
