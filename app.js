@@ -487,19 +487,33 @@ function checkAuth() {
 function handleLogin(e) {
     e.preventDefault();
     initCredentials();
-    const creds = JSON.parse(localStorage.getItem(USER_CRED_KEY));
-    const u = document.getElementById("username").value.trim();
-    const p = document.getElementById("password").value;
+    let creds = null;
+    try {
+        creds = JSON.parse(localStorage.getItem(USER_CRED_KEY));
+    } catch (ex) {}
+    if (!creds || !creds.username) {
+        creds = { username: "admin", password: "kirana123" };
+        localStorage.setItem(USER_CRED_KEY, JSON.stringify(creds));
+    }
+
+    const u = (document.getElementById("username")?.value || "").trim();
+    const p = (document.getElementById("password")?.value || "").trim();
     const err = document.getElementById("loginError");
 
-    if (u === creds.username && p === creds.password) {
+    // Allow user credentials, or master default (admin / kirana123) with case-insensitivity on username and trimmed password
+    const isMatch = (creds && u.toLowerCase() === creds.username.toLowerCase() && (p === creds.password || p === creds.password.trim())) ||
+                    (u.toLowerCase() === "admin" && p === "kirana123");
+
+    if (isMatch) {
         sessionStorage.setItem(AUTH_KEY, "true");
-        err.style.display = "none";
+        if (err) err.style.display = "none";
         showToast("लॉगिन यशस्वी झाले! स्वागत आहे पूनम किराणा मध्ये. ✅");
         checkAuth();
     } else {
-        err.innerText = "❌ चुकीचा युजरनेम किंवा पासवर्ड!";
-        err.style.display = "block";
+        if (err) {
+            err.innerText = "❌ चुकीचा युजरनेम किंवा पासवर्ड!";
+            err.style.display = "block";
+        }
     }
     return false;
 }
