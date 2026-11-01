@@ -390,6 +390,7 @@ const CATALOG_KEY = "kirana_supplier_catalog_v2";
 const AUTH_KEY = "kirana_auth_status_v2";
 const USER_CRED_KEY = "kirana_user_credentials_v2";
 const CUSTOM_ITEMS_KEY = "kirana_custom_master_items_v1";
+const SUPPLIER_PAYMENTS_KEY = "kirana_supplier_payments_v2";
 
 // ==================== CLOUD SYNC STATE (FIREBASE REALTIME DATABASE) ====================
 const FIREBASE_CONFIG_KEY = "kirana_firebase_config_v1";
@@ -400,6 +401,7 @@ let isSyncingToCloud = false;
 let isApplyingCloudData = false;
 let cloudListenerRef = null;
 let customMasterItems = [];
+let supplierPayments = [];
 
 function initCredentials() {
     if (!localStorage.getItem(USER_CRED_KEY)) {
@@ -425,6 +427,9 @@ function loadData() {
 
     const savedCustom = localStorage.getItem(CUSTOM_ITEMS_KEY);
     customMasterItems = savedCustom ? JSON.parse(savedCustom) : [];
+
+    const savedPayments = localStorage.getItem(SUPPLIER_PAYMENTS_KEY);
+    supplierPayments = savedPayments ? JSON.parse(savedPayments) : [];
 
     // ⚡ SPEED OPTIMIZATION: Clean up any duplicate bloated photos in memory/localStorage
     let cleaned = false;
@@ -456,6 +461,7 @@ function saveData() {
     localStorage.setItem(SALES_KEY, JSON.stringify(sales));
     localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
     localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
+    localStorage.setItem(SUPPLIER_PAYMENTS_KEY, JSON.stringify(supplierPayments));
 
     // ⚡ Realtime Push to Firebase Cloud (Sync Mobile & Laptop)
     pushDataToCloud();
@@ -748,6 +754,21 @@ function populateSupplierDropdowns() {
             filterSelect.appendChild(opt);
         });
         filterSelect.value = cur;
+    }
+
+    const paySelect = document.getElementById("paySupplierSelect");
+    if (paySelect) {
+        const curPay = paySelect.value;
+        paySelect.innerHTML = `<option value="">-- सप्लायर निवडा --</option>`;
+        suppliers.forEach(s => {
+            const sum = getSupplierDueSummary(s.name);
+            const dueTxt = sum.pendingDue > 0 ? ` [बाकी: ₹${sum.pendingDue.toLocaleString('en-IN')}]` : " [चुकता ✅]";
+            const opt = document.createElement("option");
+            opt.value = s.name;
+            opt.innerText = `${s.name}${dueTxt}`;
+            paySelect.appendChild(opt);
+        });
+        paySelect.value = curPay;
     }
 }
 
@@ -1364,6 +1385,203 @@ function calculateMultiItemBillLive() {
         marginElem.innerText = `${margin}% नफा`;
         marginElem.className = `margin-pill ${parseFloat(margin) >= 15 ? 'margin-high' : (parseFloat(margin) >= 8 ? 'margin-medium' : 'margin-low')}`;
     }
+
+    // Live update payment calculation on bill form
+    calculateBillPaymentBalance();
+}
+
+// ==================== BILL PAYMENT STATUS & SUPPLIER DUES HELPERS ====================
+
+function setBillPaymentStatus(status) {
+    const input = document.getElementById("billPaymentStatus");
+    if (input) input.value = status;
+
+    const btnPaid = document.getElementById("btnBillStatusPaid");
+    const btnCredit = document.getElementById("btnBillStatusCredit");
+    const btnPartial = document.getElementById("btnBillStatusPartial");
+
+    [btnPaid, btnCredit, btnPartial].forEach(b => {
+        if (!b) return;
+        b.style.borderColor = "#cbd5e1";
+        b.style.background = "#f8fafc";
+        b.style.color = "#64748b";
+    });
+
+    if (status === "credit" && btnCredit) {
+        btnCredit.style.borderColor = "#dc2626";
+        btnCredit.style.background = "#fee2e2";
+        btnCredit.style.color = "#b91c1c";
+    } else if (status === "partial" && btnPartial) {
+        btnPartial.style.borderColor = "#d97706";
+        btnPartial.style.background = "#fef3c7";
+        btnPartial.style.color = "#b45309";
+    } else if (btnPaid) {
+        btnPaid.style.borderColor = "#16a34a";
+        btnPaid.style.background = "#dcfce7";
+        btnPaid.style.color = "#15803d";
+    }
+
+    onBillPaymentStatusChange();
+}
+
+function onBillPaymentStatusChange() {
+    const status = document.getElementById("billPaymentStatus")?.value || "paid";
+    const paidGroup = document.getElementById("billPaidAmountGroup");
+    const modeGroup = document.getElementById("billPaymentModeGroup");
+    const noteGroup = document.getElementById("billPaymentNoteGroup");
+    const creditNotice = document.getElementById("billCreditNotice");
+
+    if (status === "credit") {
+        if (paidGroup) paidGroup.style.display = "none";
+        if (modeGroup) modeGroup.style.display = "none";
+        if (noteGroup) noteGroup.style.display = "none";
+        if (creditNotice) creditNotice.style.display = "block";
+    } else if (status === "partial") {
+        if (paidGroup) paidGroup.style.display = "block";
+        if (modeGroup) modeGroup.style.display = "block";
+        if (noteGroup) noteGroup.style.display = "block";
+        if (creditNotice) creditNotice.style.display = "none";
+    } else {
+        // full paid
+        if (paidGroup) paidGroup.style.display = "none";
+        if (modeGroup) modeGroup.style.display = "block";
+        if (noteGroup) noteGroup.style.display = "block";
+        if (creditNotice) creditNotice.style.display = "none";
+    }
+    calculateBillPaymentBalance();
+}
+
+function calculateBillPaymentBalance() {
+    const tbody = document.getElementById("billItemsTableBody");
+    let totalCost = 0;
+    if (tbody) {
+        tbody.querySelectorAll("tr").forEach(r => {
+            const qty = parseFloat(r.querySelector(".item-qty-input")?.value) || 0;
+            const buy = parseFloat(r.querySelector(".item-buy-input")?.value) || 0;
+            const name = r.querySelector(".item-name-input")?.value?.trim();
+            if (name && qty > 0 && buy > 0) {
+                totalCost += (qty * buy);
+            }
+        });
+    }
+
+    const status = document.getElementById("billPaymentStatus")?.value || "paid";
+    const paidInp = document.getElementById("billPaidAmount");
+    let paid = 0;
+    let due = 0;
+
+    if (status === "paid") {
+        paid = totalCost;
+        due = 0;
+        if (paidInp) paidInp.value = totalCost > 0 ? totalCost.toFixed(2) : "";
+    } else if (status === "credit") {
+        paid = 0;
+        due = totalCost;
+        if (paidInp) paidInp.value = "0";
+    } else if (status === "partial") {
+        paid = parseFloat(paidInp?.value) || 0;
+        if (paid > totalCost) paid = totalCost;
+        due = Math.max(0, totalCost - paid);
+    }
+
+    const dispPaid = document.getElementById("dispBillPaid");
+    const dispDue = document.getElementById("dispBillDue");
+    const dispBadge = document.getElementById("dispBillStatusBadge");
+
+    if (dispPaid) dispPaid.innerText = `₹${paid.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    if (dispDue) dispDue.innerText = `₹${due.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    if (dispBadge) {
+        if (due <= 0 && totalCost > 0) {
+            dispBadge.className = "badge-paid";
+            dispBadge.innerText = "हिशोब पूर्ण चुकता ✅";
+        } else if (paid <= 0 && totalCost > 0) {
+            dispBadge.className = "badge-due";
+            dispBadge.innerText = `🔴 पूर्ण उधारी (बाकी: ₹${due.toLocaleString('en-IN')})`;
+        } else if (due > 0) {
+            dispBadge.className = "badge-partial";
+            dispBadge.innerText = `🟡 अंशतः दिले (बाकी: ₹${due.toLocaleString('en-IN')})`;
+        } else {
+            dispBadge.className = "badge-paid";
+            dispBadge.innerText = "हिशोब चुकता ✅";
+        }
+    }
+}
+
+function getSupplierDueSummary(supplierName) {
+    if (!supplierName) {
+        return { totalPurchase: 0, totalPaid: 0, pendingDue: 0, billsCount: 0, paymentsCount: 0 };
+    }
+
+    const suppBills = bills.filter(b => b.supplier === supplierName);
+    const totalPurchase = suppBills.reduce((acc, b) => acc + (parseFloat(b.totalCost) || 0), 0);
+
+    const invoiceKeys = new Set(suppBills.map(b => getInvoiceKey(b)));
+    const suppPayments = supplierPayments.filter(p => p.supplier === supplierName);
+    const totalPaid = suppPayments.reduce((acc, p) => acc + (parseFloat(p.amount) || 0), 0);
+    const pendingDue = Math.max(0, totalPurchase - totalPaid);
+
+    return {
+        totalPurchase,
+        totalPaid,
+        pendingDue,
+        billsCount: invoiceKeys.size,
+        itemsCount: suppBills.length,
+        paymentsCount: suppPayments.length
+    };
+}
+
+function getSupplierStatement(supplierName) {
+    const statement = [];
+
+    // Group invoices
+    const suppBills = bills.filter(b => b.supplier === supplierName);
+    const groups = new Map();
+    suppBills.forEach(b => {
+        const key = getInvoiceKey(b);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(b);
+    });
+
+    groups.forEach((items, invKey) => {
+        const first = items[0];
+        const cost = items.reduce((s, it) => s + (parseFloat(it.totalCost) || 0), 0);
+        statement.push({
+            date: first.date,
+            timestamp: new Date(first.date).getTime() || 0,
+            type: "खरेदी बिल",
+            ref: first.billNumber,
+            debit: cost,
+            credit: 0,
+            isBill: true,
+            invKey
+        });
+    });
+
+    // Payments
+    const suppPayments = supplierPayments.filter(p => p.supplier === supplierName);
+    suppPayments.forEach(p => {
+        statement.push({
+            date: p.date,
+            timestamp: new Date(p.date).getTime() || p.id,
+            type: `पेमेंट जमा (${p.mode === 'cash' ? 'रोख' : (p.mode === 'upi' ? 'UPI' : p.mode)})`,
+            ref: p.note || p.billNumber || '-',
+            debit: 0,
+            credit: parseFloat(p.amount) || 0,
+            isPayment: true,
+            paymentId: p.id
+        });
+    });
+
+    // Sort chronologically (oldest to newest)
+    statement.sort((a, b) => a.timestamp - b.timestamp);
+
+    let runningBal = 0;
+    statement.forEach(row => {
+        runningBal += (row.debit - row.credit);
+        row.balance = Math.max(0, runningBal);
+    });
+
+    return statement;
 }
 
 function openAddSupplierModal(id = null) {
@@ -1477,8 +1695,35 @@ function filterBillsBySupplier(supplierName) {
 function renderSuppliersSection() {
     const grid = document.getElementById("suppliersGrid");
     const tbody = document.getElementById("suppliersTableBody");
+    if (!grid || !tbody) return;
+
     grid.innerHTML = "";
     tbody.innerHTML = "";
+
+    // Overall summary banner stats
+    let grandSuppBuy = 0;
+    let grandSuppPaid = 0;
+    let grandSuppDues = 0;
+
+    suppliers.forEach(s => {
+        const sum = getSupplierDueSummary(s.name);
+        grandSuppBuy += sum.totalPurchase;
+        grandSuppPaid += sum.totalPaid;
+        grandSuppDues += sum.pendingDue;
+    });
+
+    const sumCountEl = document.getElementById("suppSummaryCount");
+    const sumBuyEl = document.getElementById("suppSummaryTotalBuy");
+    const sumPaidEl = document.getElementById("suppSummaryTotalPaid");
+    const sumDuesEl = document.getElementById("suppSummaryTotalDues");
+
+    if (sumCountEl) sumCountEl.innerText = `${suppliers.length} सप्लायर्स`;
+    if (sumBuyEl) sumBuyEl.innerText = `₹${grandSuppBuy.toLocaleString('en-IN')}`;
+    if (sumPaidEl) sumPaidEl.innerText = `₹${grandSuppPaid.toLocaleString('en-IN')}`;
+    if (sumDuesEl) {
+        sumDuesEl.innerText = `₹${grandSuppDues.toLocaleString('en-IN')}`;
+        sumDuesEl.style.color = grandSuppDues > 0 ? "#b91c1c" : "#15803d";
+    }
 
     if (suppliers.length === 0) {
         grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:30px; background:#fff; border-radius:12px; color:#64748b;">
@@ -1489,11 +1734,11 @@ function renderSuppliersSection() {
     }
 
     suppliers.forEach(s => {
-        const suppBills = bills.filter(b => b.supplier === s.name);
-        const billCount = suppBills.length;
-        const totalBuy = suppBills.reduce((acc, b) => acc + (parseFloat(b.totalCost) || 0), 0);
-        const totalExpected = suppBills.reduce((acc, b) => acc + (parseFloat(b.totalExpected) || 0), 0);
-        const totalProfit = totalExpected - totalBuy;
+        const sum = getSupplierDueSummary(s.name);
+        const billCount = sum.billsCount;
+        const totalBuy = sum.totalPurchase;
+        const totalPaid = sum.totalPaid;
+        const pendingDue = sum.pendingDue;
 
         // Card rendering
         const card = document.createElement("div");
@@ -1512,10 +1757,15 @@ function renderSuppliersSection() {
                     <span>एकूण बिले: <strong>${billCount}</strong></span>
                     <span>खरेदी: <strong style="color:#dc2626;">₹${totalBuy.toLocaleString('en-IN')}</strong></span>
                 </div>
+                <div class="supplier-stats-row" style="margin-top:5px; padding-top:5px; border-top:1px dashed #e2e8f0;">
+                    <span>दिलेले पैसे: <strong style="color:#15803d;">₹${totalPaid.toLocaleString('en-IN')}</strong></span>
+                    <span>देणे बाकी: <strong style="color:${pendingDue > 0 ? '#b91c1c' : '#15803d'}; font-size:14.5px;">${pendingDue > 0 ? '₹' + pendingDue.toLocaleString('en-IN') : 'चुकता ✅'}</strong></span>
+                </div>
             </div>
-            <div class="supplier-actions" style="flex-wrap:wrap;">
-                <button class="btn-sm btn-quick btn-green" style="flex:1;" onclick="downloadSupplierReportExcel('${encodeURIComponent(s.name)}')">📊 Excel रिपोर्ट 📥</button>
-                <button class="btn-sm btn-quick" onclick="downloadSupplierReportCSV('${encodeURIComponent(s.name)}')">📄 CSV</button>
+            <div class="supplier-actions" style="flex-wrap:wrap; gap:6px;">
+                <button class="btn-sm btn-quick" style="background:#16a34a; color:#fff;" onclick="openPaySupplierModal('${encodeURIComponent(s.name)}')">💵 पैसे द्या</button>
+                <button class="btn-sm btn-quick" style="background:#0284c7; color:#fff;" onclick="openSupplierLedgerModal('${encodeURIComponent(s.name)}')">📜 खातेवही</button>
+                <button class="btn-sm btn-quick btn-green" onclick="downloadSupplierReportExcel('${encodeURIComponent(s.name)}')">📊 Excel</button>
                 <button class="btn-sm btn-quick" onclick="filterBillsBySupplier('${s.name}')">📑 बिले</button>
                 <button class="btn-sm btn-edit" onclick="openAddSupplierModal(${s.id})">✏️</button>
                 <button class="btn-sm btn-delete" onclick="deleteSupplier(${s.id})">🗑️</button>
@@ -1529,19 +1779,23 @@ function renderSuppliersSection() {
             <td><strong>${s.name}</strong></td>
             <td>${SECTION_CONFIG[s.section]?.name || s.section}</td>
             <td>${s.phone || '-'}</td>
-            <td>${billCount}</td>
-            <td><strong>₹${totalBuy.toLocaleString('en-IN')}</strong></td>
-            <td>₹${totalExpected.toLocaleString('en-IN')}</td>
-            <td><span class="profit-badge">₹${totalProfit.toLocaleString('en-IN')}</span></td>
+            <td style="text-align:center;">${billCount}</td>
+            <td style="text-align:right;"><strong>₹${totalBuy.toLocaleString('en-IN', {minimumFractionDigits: 2})}</strong></td>
+            <td style="text-align:right; color:#15803d; font-weight:700;">₹${totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+            <td style="text-align:right;">
+                ${pendingDue > 0 
+                    ? `<span class="badge-due" style="font-size:13px;">₹${pendingDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>` 
+                    : `<span class="badge-paid">चुकता ✅</span>`}
+            </td>
             <td>
                 <div class="action-btn-group">
-                    <button class="btn-sm btn-quick btn-green" onclick="downloadSupplierReportExcel('${encodeURIComponent(s.name)}')">📊 Excel 📥</button>
-                    <button class="btn-sm btn-quick" onclick="downloadSupplierReportCSV('${encodeURIComponent(s.name)}')">📄 CSV</button>
+                    <button class="btn-sm btn-quick" style="background:#0284c7; color:#fff;" onclick="openSupplierLedgerModal('${encodeURIComponent(s.name)}')">📜 खातेवही</button>
+                    <button class="btn-sm btn-quick btn-green" onclick="downloadSupplierReportExcel('${encodeURIComponent(s.name)}')">📊 Excel</button>
                 </div>
             </td>
             <td>
                 <div class="action-btn-group">
-                    <button class="btn-sm btn-edit" onclick="filterBillsBySupplier('${s.name}')">📑</button>
+                    <button class="btn-sm btn-quick" style="background:#16a34a; color:#fff;" onclick="openPaySupplierModal('${encodeURIComponent(s.name)}')">💵 द्या</button>
                     <button class="btn-sm btn-edit" onclick="openAddSupplierModal(${s.id})">✏️</button>
                     <button class="btn-sm btn-delete" onclick="deleteSupplier(${s.id})">🗑️</button>
                 </div>
@@ -2315,6 +2569,21 @@ function handleSaveBulkBill(e) {
         const invoiceId = `INV-${Date.now()}`;
         const invoicePhoto = currentBillPhotoBase64 || null;
 
+        const grandTotalCost = validItems.reduce((acc, it) => acc + it.totalCost, 0);
+        const paymentStatus = document.getElementById("billPaymentStatus")?.value || "paid";
+        let paidAmount = 0;
+        if (paymentStatus === "paid") {
+            paidAmount = grandTotalCost;
+        } else if (paymentStatus === "credit") {
+            paidAmount = 0;
+        } else if (paymentStatus === "partial") {
+            paidAmount = parseFloat(document.getElementById("billPaidAmount")?.value) || 0;
+            if (paidAmount > grandTotalCost) paidAmount = grandTotalCost;
+        }
+        const dueAmount = Math.max(0, grandTotalCost - paidAmount);
+        const paymentMode = document.getElementById("billPaymentMode")?.value || "cash";
+        const paymentNote = document.getElementById("billPaymentNote")?.value?.trim() || "";
+
         // ⚡ SPEED FIX: Attach photo ONLY to first item (idx === 0)
         // Eliminates 5MB bloating per bill! Saves in milliseconds!
         const newBillEntries = validItems.map((item, idx) => ({
@@ -2333,10 +2602,27 @@ function handleSaveBulkBill(e) {
             totalExpected: item.totalExpected,
             profit: item.profit,
             margin: item.margin,
-            photo: (idx === 0 ? invoicePhoto : null)
+            photo: (idx === 0 ? invoicePhoto : null),
+            paymentStatus,
+            paidAmount: (idx === 0 ? paidAmount : 0),
+            dueAmount: (idx === 0 ? dueAmount : 0)
         }));
 
         bills.unshift(...newBillEntries);
+
+        // Record payment in supplierPayments if any amount was paid upfront
+        if (paidAmount > 0) {
+            supplierPayments.unshift({
+                id: Date.now() + 888,
+                date,
+                supplier,
+                billNumber,
+                invoiceId,
+                amount: paidAmount,
+                mode: paymentMode,
+                note: paymentNote || (paymentStatus === "paid" ? `बिल ${billNumber} पूर्ण रोख दिले` : `बिल ${billNumber} अंशतः दिले (बाकी: ₹${dueAmount.toFixed(2)})`)
+            });
+        }
 
         // Save items to supplier catalog for future quick load
         if (!supplierCatalog[supplier]) {
@@ -2366,10 +2652,12 @@ function handleSaveBulkBill(e) {
             submitBtn.innerText = origText;
         }
 
-        const grandTotalCost = validItems.reduce((acc, it) => acc + it.totalCost, 0);
         showToast(`✅ "${supplier}" चे संपूर्ण बिल (${validItems.length} माल, एकूण ₹${grandTotalCost.toLocaleString('en-IN')}) एका सेकंदात सेव्ह झाले!`);
 
         document.getElementById("bulkBillForm").reset();
+        const statSelect = document.getElementById("billPaymentStatus");
+        if (statSelect) statSelect.value = "paid";
+        onBillPaymentStatusChange();
         removeBillPhotoPreview();
         tbody.innerHTML = "";
         addMultipleBlankRows(5);
@@ -2469,6 +2757,31 @@ function renderDashboard() {
     // Card 4: Suppliers
     const dashSuppCountEl = document.getElementById("dashSuppliersCount");
     if (dashSuppCountEl) dashSuppCountEl.innerText = `${suppliers.length} सप्लायर्स`;
+
+    // Card 5: Supplier Pending Dues
+    let totalSupplierPurchase = 0;
+    let totalSupplierPaid = 0;
+    let pendingSuppliersCount = 0;
+
+    suppliers.forEach(s => {
+        const sum = getSupplierDueSummary(s.name);
+        totalSupplierPurchase += sum.totalPurchase;
+        totalSupplierPaid += sum.totalPaid;
+        if (sum.pendingDue > 0) {
+            pendingSuppliersCount++;
+        }
+    });
+
+    const totalSupplierDues = Math.max(0, totalSupplierPurchase - totalSupplierPaid);
+    const dashDuesEl = document.getElementById("dashTotalDues");
+    const dashPendingSuppEl = document.getElementById("dashPendingSuppliersCount");
+    if (dashDuesEl) dashDuesEl.innerText = `₹${totalSupplierDues.toLocaleString('en-IN')}`;
+    if (dashPendingSuppEl) {
+        dashPendingSuppEl.innerText = pendingSuppliersCount > 0 
+            ? `${pendingSuppliersCount} सप्लायर्सचे देणे बाकी ⚠️` 
+            : `सर्व सप्लायर्सचे हिशोब चुकता ✅`;
+        dashPendingSuppEl.style.color = pendingSuppliersCount > 0 ? "#b91c1c" : "#15803d";
+    }
 
     // Section Summary Table
     const secSummaryBody = document.getElementById("dashSectionSummaryBody");
@@ -2571,6 +2884,7 @@ function renderBillsList() {
     const search = (document.getElementById("billSearchInput")?.value || "").toLowerCase().trim();
     const filterSec = document.getElementById("billSectionFilter")?.value || "all";
     const filterSupp = document.getElementById("billSupplierFilter")?.value || "all";
+    const filterPay = document.getElementById("billPaymentFilter")?.value || "all";
 
     const filtered = bills.filter(b => {
         const matchSec = filterSec === "all" || b.section === filterSec;
@@ -2578,7 +2892,16 @@ function renderBillsList() {
         const matchSearch = (b.supplier || "").toLowerCase().includes(search) ||
                             (b.itemName || "").toLowerCase().includes(search) ||
                             (b.billNumber || "").toLowerCase().includes(search);
-        return matchSec && matchSupp && matchSearch;
+
+        const pStat = b.paymentStatus || "paid";
+        let matchPay = true;
+        if (filterPay === "due") {
+            matchPay = (pStat === "credit" || pStat === "partial");
+        } else if (filterPay === "paid") {
+            matchPay = (pStat === "paid");
+        }
+
+        return matchSec && matchSupp && matchSearch && matchPay;
     });
 
     if (billsViewMode === "invoices") {
@@ -2604,7 +2927,7 @@ function renderInvoicesGroupedTable(filtered) {
     });
 
     if (groups.size === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:24px; color:#94a3b8;">कोणतेही सप्लायर बिल सापडले नाही. वर '➕ नवीन बिल नोंदवा' दाबा.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:24px; color:#94a3b8;">कोणतेही सप्लायर बिल सापडले नाही. वर '➕ नवीन बिल नोंदवा' दाबा.</td></tr>`;
         return;
     }
 
@@ -2620,6 +2943,16 @@ function renderInvoicesGroupedTable(filtered) {
         const secSet = new Set(items.map(it => it.section));
         const secBadges = Array.from(secSet).map(s => `<span class="supplier-tag" style="margin-right:3px;">${SECTION_CONFIG[s]?.name?.split(" ")[1] || s}</span>`).join("");
 
+        const pStatus = first.paymentStatus || "paid";
+        let statusBadge = "";
+        if (pStatus === "credit") {
+            statusBadge = `<span class="badge-due">🔴 उधारी (बाकी)</span>`;
+        } else if (pStatus === "partial") {
+            statusBadge = `<span class="badge-partial">🟡 अंशतः दिले</span>`;
+        } else {
+            statusBadge = `<span class="badge-paid">🟢 पूर्ण रोख</span>`;
+        }
+
         const invoicePhoto = items.find(it => it.photo)?.photo || null;
         const photoBtn = invoicePhoto
             ? `<button class="btn-photo-view" onclick="viewPhotoByUrl('${invoicePhoto}', '🖼️ बिल फोटो — ${first.supplier} (${first.billNumber})', 'तारीख: ${first.date} | एकूण माल: ${totalItemsCount} आयटम्स | एकूण खरेदी: ₹${totalCost.toLocaleString('en-IN')}')">📷 फोटो</button>`
@@ -2630,6 +2963,7 @@ function renderInvoicesGroupedTable(filtered) {
             <td>${first.date}</td>
             <td><strong>${first.supplier}</strong></td>
             <td><strong style="color:#0284c7;">${first.billNumber}</strong></td>
+            <td>${statusBadge}</td>
             <td><span class="badge-item-count">${totalItemsCount} माल / आयटम्स</span></td>
             <td>${secBadges}</td>
             <td style="color:#dc2626; font-weight:700;">₹${totalCost.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
@@ -2637,8 +2971,9 @@ function renderInvoicesGroupedTable(filtered) {
             <td><span class="profit-badge">₹${totalProfit.toLocaleString('en-IN', {minimumFractionDigits: 2})} (${margin}%)</span></td>
             <td>${photoBtn}</td>
             <td>
-                <div class="action-btn-group" style="flex-wrap:wrap;">
-                    <button class="btn-sm btn-quick" onclick="openInvoiceDetailsModal('${encodeURIComponent(invKey)}')">🔍 सर्व माल पहा (${totalItemsCount})</button>
+                <div class="action-btn-group" style="flex-wrap:wrap; gap:4px;">
+                    <button class="btn-sm btn-quick" onclick="openInvoiceDetailsModal('${encodeURIComponent(invKey)}')">🔍 माल (${totalItemsCount})</button>
+                    <button class="btn-sm btn-quick" style="background:#475569;" onclick="openInvoicePaymentStatusModal('${encodeURIComponent(invKey)}')">💳 पेमेंट बदला</button>
                     <button class="btn-sm btn-quick btn-green" onclick="downloadSingleInvoiceExcel('${encodeURIComponent(invKey)}')">📊 Excel</button>
                     <button class="btn-sm btn-delete" onclick="deleteCompleteInvoice('${encodeURIComponent(invKey)}')" title="हे संपूर्ण बिल हटवा">🗑️</button>
                 </div>
@@ -2880,6 +3215,394 @@ function deleteBill(id) {
     }
 }
 
+// ==================== SUPPLIER PAYMENTS & KHATA (LEDGER) ====================
+
+function openPaySupplierModal(prefillSupplierName = "") {
+    const modal = document.getElementById("paySupplierModal");
+    if (!modal) return;
+
+    populateSupplierDropdowns();
+    const sel = document.getElementById("paySupplierSelect");
+    const dateInp = document.getElementById("paySupplierDate");
+    const amtInp = document.getElementById("paySupplierAmount");
+    const noteInp = document.getElementById("paySupplierNote");
+
+    if (dateInp) dateInp.value = new Date().toISOString().slice(0, 10);
+    if (noteInp) noteInp.value = "";
+
+    if (prefillSupplierName && sel) {
+        const decoded = decodeURIComponent(prefillSupplierName);
+        sel.value = decoded;
+    }
+    onPaySupplierSelected();
+
+    modal.style.display = "flex";
+    if (amtInp) setTimeout(() => amtInp.focus(), 60);
+}
+
+function closePaySupplierModal() {
+    const modal = document.getElementById("paySupplierModal");
+    if (modal) modal.style.display = "none";
+}
+
+function onPaySupplierSelected() {
+    const sel = document.getElementById("paySupplierSelect");
+    const supp = sel ? sel.value : "";
+    const dueEl = document.getElementById("paySupplierDueAmount");
+    const amtInp = document.getElementById("paySupplierAmount");
+
+    if (!supp) {
+        if (dueEl) dueEl.innerText = "₹0.00";
+        return;
+    }
+
+    const summary = getSupplierDueSummary(supp);
+    if (dueEl) {
+        dueEl.innerText = summary.pendingDue > 0 
+            ? `₹${summary.pendingDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}` 
+            : "हिशोब चुकता (₹0.00)";
+        dueEl.style.color = summary.pendingDue > 0 ? "#b91c1c" : "#15803d";
+    }
+
+    if (amtInp && (!amtInp.value || parseFloat(amtInp.value) === 0)) {
+        if (summary.pendingDue > 0) {
+            amtInp.value = summary.pendingDue.toFixed(2);
+        }
+    }
+}
+
+function handleSaveSupplierPayment(e) {
+    e.preventDefault();
+    const supplier = document.getElementById("paySupplierSelect")?.value?.trim();
+    const date = document.getElementById("paySupplierDate")?.value;
+    const amount = parseFloat(document.getElementById("paySupplierAmount")?.value) || 0;
+    const mode = document.getElementById("paySupplierMode")?.value || "cash";
+    const note = document.getElementById("paySupplierNote")?.value?.trim() || "";
+
+    if (!supplier) {
+        alert("कृपया सप्लायर निवडा!");
+        return false;
+    }
+    if (!date) {
+        alert("कृपया तारीख निवडा!");
+        return false;
+    }
+    if (amount <= 0) {
+        alert("कृपया वैध रक्कम टाका!");
+        return false;
+    }
+
+    const newPayment = {
+        id: Date.now(),
+        date,
+        supplier,
+        amount,
+        mode,
+        note: note || `पेमेंट दिले (${mode === 'cash' ? 'रोख' : (mode === 'upi' ? 'UPI' : mode)})`
+    };
+
+    supplierPayments.unshift(newPayment);
+    saveData();
+
+    closePaySupplierModal();
+    populateSupplierDropdowns();
+    renderSuppliersSection();
+    renderDashboard();
+    if (currentActiveSection === "bills") renderBillsList();
+
+    const sum = getSupplierDueSummary(supplier);
+    showToast(`✅ "${supplier}" ला ₹${amount.toLocaleString('en-IN')} पेमेंट जमा झाले! (शिल्लक बाकी: ₹${sum.pendingDue.toLocaleString('en-IN')})`);
+
+    // If ledger modal is open, re-render it
+    const ledgerModal = document.getElementById("supplierLedgerModal");
+    if (ledgerModal && ledgerModal.style.display !== "none") {
+        openSupplierLedgerModal(encodeURIComponent(supplier));
+    }
+
+    return false;
+}
+
+function deleteSupplierPayment(paymentId, encodedSupplierName) {
+    const supplierName = decodeURIComponent(encodedSupplierName);
+    const p = supplierPayments.find(it => it.id == paymentId);
+    if (!p) return;
+
+    if (confirm(`तुम्हाला तारीख ${p.date} रोजीचे ₹${p.amount} चे पेमेंट डिलीट करायचे आहे का?`)) {
+        supplierPayments = supplierPayments.filter(it => it.id != paymentId);
+        saveData();
+        populateSupplierDropdowns();
+        renderSuppliersSection();
+        renderDashboard();
+        if (currentActiveSection === "bills") renderBillsList();
+        openSupplierLedgerModal(encodedSupplierName);
+        showToast("🗑️ पेमेंट नोंद हटवली गेली.");
+    }
+}
+
+function openSupplierLedgerModal(encodedSupplierName) {
+    const supplierName = decodeURIComponent(encodedSupplierName);
+    const supp = suppliers.find(s => s.name === supplierName);
+    const summary = getSupplierDueSummary(supplierName);
+    const statement = getSupplierStatement(supplierName);
+
+    const titleEl = document.getElementById("ledgerModalTitle");
+    const subEl = document.getElementById("ledgerModalSubtitle");
+    if (titleEl) titleEl.innerText = `📜 सप्लायर खातेवही — ${supplierName}`;
+    if (subEl) subEl.innerText = `📱 मोबाईल: ${supp?.phone || 'नोंद नाही'} | 📍 पत्ता: ${supp?.address || 'नोंद नाही'} | एकूण बिले: ${summary.billsCount} | एकूण पेमेंट्स: ${summary.paymentsCount}`;
+
+    const totBuyEl = document.getElementById("ledgerTotalPurchase");
+    const totPaidEl = document.getElementById("ledgerTotalPaid");
+    const balDueEl = document.getElementById("ledgerBalanceDue");
+
+    if (totBuyEl) totBuyEl.innerText = `₹${summary.totalPurchase.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    if (totPaidEl) totPaidEl.innerText = `₹${summary.totalPaid.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    if (balDueEl) {
+        balDueEl.innerText = summary.pendingDue > 0 ? `₹${summary.pendingDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}` : "हिशोब चुकता ✅";
+        balDueEl.style.color = summary.pendingDue > 0 ? "#b91c1c" : "#15803d";
+    }
+
+    const payBtn = document.getElementById("ledgerPayNowBtn");
+    if (payBtn) {
+        payBtn.onclick = () => {
+            closeSupplierLedgerModal();
+            openPaySupplierModal(encodedSupplierName);
+        };
+    }
+
+    const excelBtn = document.getElementById("ledgerExcelBtn");
+    if (excelBtn) {
+        excelBtn.onclick = () => downloadSupplierLedgerExcel(encodedSupplierName);
+    }
+
+    const tbody = document.getElementById("ledgerModalItemsBody");
+    if (!tbody) return;
+
+    if (statement.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:#94a3b8;">या सप्लायरच्या कोणत्याही खरेदी किंवा पेमेंट नोंदी नाहीत.</td></tr>`;
+    } else {
+        const reversed = [...statement].reverse();
+        tbody.innerHTML = reversed.map((row, idx) => `
+            <tr>
+                <td style="text-align:center;">${reversed.length - idx}</td>
+                <td style="text-align:center;">${row.date}</td>
+                <td><strong>${row.type}</strong></td>
+                <td>${row.ref || '-'}</td>
+                <td style="text-align:right; font-weight:700; color:#dc2626;">${row.debit > 0 ? '₹' + row.debit.toLocaleString('en-IN', {minimumFractionDigits: 2}) : '-'}</td>
+                <td style="text-align:right; font-weight:700; color:#15803d;">${row.credit > 0 ? '₹' + row.credit.toLocaleString('en-IN', {minimumFractionDigits: 2}) : '-'}</td>
+                <td style="text-align:right; font-weight:800; color:${row.balance > 0 ? '#b91c1c' : '#15803d'};">
+                    ${row.balance > 0 ? '₹' + row.balance.toLocaleString('en-IN', {minimumFractionDigits: 2}) : '0.00'}
+                </td>
+                <td style="text-align:center;">
+                    ${row.isPayment ? `<button class="btn-sm btn-delete" onclick="deleteSupplierPayment(${row.paymentId}, '${encodedSupplierName}')" title="पेमेंट डिलीट करा">🗑️</button>` : `<span style="font-size:12px; color:#94a3b8;">बिल</span>`}
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    document.getElementById("supplierLedgerModal").style.display = "flex";
+}
+
+function closeSupplierLedgerModal() {
+    const modal = document.getElementById("supplierLedgerModal");
+    if (modal) modal.style.display = "none";
+}
+
+function downloadSupplierLedgerExcel(encodedSupplierName) {
+    const supplierName = decodeURIComponent(encodedSupplierName);
+    const supp = suppliers.find(s => s.name === supplierName);
+    const summary = getSupplierDueSummary(supplierName);
+    const statement = getSupplierStatement(supplierName);
+
+    let rowsHtml = "";
+    statement.forEach((row, idx) => {
+        rowsHtml += `
+            <tr>
+                <td style="text-align:center;">${idx + 1}</td>
+                <td style="text-align:center;">${row.date}</td>
+                <td><strong>${row.type}</strong></td>
+                <td style="text-align:center;">${row.ref || '-'}</td>
+                <td style="text-align:right; color:#dc2626;">${row.debit > 0 ? '₹' + row.debit.toFixed(2) : '-'}</td>
+                <td style="text-align:right; color:#15803d;">${row.credit > 0 ? '₹' + row.credit.toFixed(2) : '-'}</td>
+                <td style="text-align:right; font-weight:700;">₹${row.balance.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    const htmlContent = `
+        <table>
+            <tr><td colspan="7" class="title-cell">🏪 पूनम किराणा — सप्लायर खातेवही स्टेटमेंट</td></tr>
+            <tr><td colspan="7" class="sub-cell"><strong>सप्लायर:</strong> ${supplierName} | <strong>मोबाईल:</strong> ${supp?.phone || '-'} | <strong>तारीख:</strong> ${new Date().toLocaleDateString('mr-IN')}</td></tr>
+            <tr>
+                <td colspan="2" style="font-weight:700; background:#fee2e2; color:#dc2626;">एकूण खरेदी: ₹${summary.totalPurchase.toFixed(2)}</td>
+                <td colspan="2" style="font-weight:700; background:#dcfce7; color:#15803d;">एकूण दिलेले: ₹${summary.totalPaid.toFixed(2)}</td>
+                <td colspan="3" style="font-weight:700; background:#fef2f2; color:#b91c1c;">🔴 बाकी देणे: ₹${summary.pendingDue.toFixed(2)}</td>
+            </tr>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>तारीख</th>
+                    <th>तपशील</th>
+                    <th>संदर्भ / बिल नं.</th>
+                    <th>खरेदी (+)</th>
+                    <th>दिलेले पैसे (-)</th>
+                    <th>शिल्लक बाकी (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHtml}
+            </tbody>
+        </table>
+    `;
+
+    triggerExcelDownload(htmlContent, `पूनम_किराणा_खातेवही_${supplierName}_${new Date().toISOString().slice(0, 10)}.xls`);
+}
+
+function openInvoicePaymentStatusModal(encodedInvoiceKey) {
+    const invKey = decodeURIComponent(encodedInvoiceKey);
+    const invoiceItems = bills.filter(b => getInvoiceKey(b) === invKey);
+    if (invoiceItems.length === 0) return;
+
+    const first = invoiceItems[0];
+    const totalCost = invoiceItems.reduce((acc, it) => acc + (parseFloat(it.totalCost) || 0), 0);
+
+    document.getElementById("editInvKey").value = invKey;
+    document.getElementById("editInvSupplier").innerText = first.supplier;
+    document.getElementById("editInvBillNum").innerText = first.billNumber;
+    document.getElementById("editInvDate").innerText = first.date;
+    document.getElementById("editInvTotalCost").innerText = `₹${totalCost.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+    const currentStatus = first.paymentStatus || "paid";
+    setEditInvoiceStatus(currentStatus);
+
+    const paidInp = document.getElementById("editInvPaidAmount");
+    if (paidInp) {
+        paidInp.value = first.paidAmount !== undefined ? first.paidAmount : (currentStatus === "paid" ? totalCost : 0);
+    }
+
+    document.getElementById("invoicePaymentModal").style.display = "flex";
+}
+
+function closeInvoicePaymentModal() {
+    const modal = document.getElementById("invoicePaymentModal");
+    if (modal) modal.style.display = "none";
+}
+
+function setEditInvoiceStatus(status) {
+    const input = document.getElementById("editInvStatus");
+    if (input) input.value = status;
+
+    const btnPaid = document.getElementById("btnEditStatusPaid");
+    const btnCredit = document.getElementById("btnEditStatusCredit");
+    const btnPartial = document.getElementById("btnEditStatusPartial");
+
+    [btnPaid, btnCredit, btnPartial].forEach(b => {
+        if (!b) return;
+        b.style.borderColor = "#cbd5e1";
+        b.style.background = "#f8fafc";
+        b.style.color = "#64748b";
+    });
+
+    if (status === "credit" && btnCredit) {
+        btnCredit.style.borderColor = "#dc2626";
+        btnCredit.style.background = "#fee2e2";
+        btnCredit.style.color = "#b91c1c";
+    } else if (status === "partial" && btnPartial) {
+        btnPartial.style.borderColor = "#d97706";
+        btnPartial.style.background = "#fef3c7";
+        btnPartial.style.color = "#b45309";
+    } else if (btnPaid) {
+        btnPaid.style.borderColor = "#16a34a";
+        btnPaid.style.background = "#dcfce7";
+        btnPaid.style.color = "#15803d";
+    }
+
+    onEditInvStatusChange();
+}
+
+function onEditInvStatusChange() {
+    const status = document.getElementById("editInvStatus")?.value || "paid";
+    const paidGroup = document.getElementById("editInvPaidGroup");
+    const modeGroup = document.getElementById("editInvModeGroup");
+    const noteGroup = document.getElementById("editInvNoteGroup");
+    const notice = document.getElementById("editInvCreditNotice");
+
+    if (status === "credit") {
+        if (paidGroup) paidGroup.style.display = "none";
+        if (modeGroup) modeGroup.style.display = "none"; // Hide Payment Mode!
+        if (noteGroup) noteGroup.style.display = "none"; // Hide Note!
+        if (notice) notice.style.display = "block";      // Show Credit Notice!
+    } else if (status === "partial") {
+        if (paidGroup) paidGroup.style.display = "block";
+        if (modeGroup) modeGroup.style.display = "block";
+        if (noteGroup) noteGroup.style.display = "block";
+        if (notice) notice.style.display = "none";
+    } else {
+        // full paid
+        if (paidGroup) paidGroup.style.display = "none";
+        if (modeGroup) modeGroup.style.display = "block";
+        if (noteGroup) noteGroup.style.display = "block";
+        if (notice) notice.style.display = "none";
+    }
+}
+
+function handleUpdateInvoicePaymentStatus(e) {
+    e.preventDefault();
+    const invKey = document.getElementById("editInvKey").value;
+    const invoiceItems = bills.filter(b => getInvoiceKey(b) === invKey);
+    if (invoiceItems.length === 0) return false;
+
+    const first = invoiceItems[0];
+    const totalCost = invoiceItems.reduce((acc, it) => acc + (parseFloat(it.totalCost) || 0), 0);
+    const newStatus = document.getElementById("editInvStatus").value;
+    const mode = document.getElementById("editInvMode").value;
+    const note = document.getElementById("editInvNote").value.trim();
+
+    let newPaid = 0;
+    if (newStatus === "paid") newPaid = totalCost;
+    else if (newStatus === "credit") newPaid = 0;
+    else if (newStatus === "partial") {
+        newPaid = parseFloat(document.getElementById("editInvPaidAmount").value) || 0;
+        if (newPaid > totalCost) newPaid = totalCost;
+    }
+    const newDue = Math.max(0, totalCost - newPaid);
+
+    // Update all items in this bill
+    invoiceItems.forEach(it => {
+        it.paymentStatus = newStatus;
+        it.paidAmount = newPaid;
+        it.dueAmount = newDue;
+    });
+
+    // Remove any previous payments for this invoice
+    supplierPayments = supplierPayments.filter(p => !(p.invoiceId === invKey || (p.billNumber === first.billNumber && p.supplier === first.supplier)));
+
+    // If paid > 0, record new payment
+    if (newPaid > 0) {
+        supplierPayments.unshift({
+            id: Date.now(),
+            date: first.date,
+            supplier: first.supplier,
+            billNumber: first.billNumber,
+            invoiceId: invKey,
+            amount: newPaid,
+            mode,
+            note: note || (newStatus === "paid" ? `बिल ${first.billNumber} पूर्ण रोख केले` : `बिल ${first.billNumber} अंशतः रोख केले`)
+        });
+    }
+
+    saveData();
+    closeInvoicePaymentModal();
+    populateSupplierDropdowns();
+    renderBillsList();
+    renderSuppliersSection();
+    renderDashboard();
+
+    showToast(`✅ बिल ${first.billNumber} ची पेमेंट स्थिती अपडेट झाली!`);
+    return false;
+}
+
 // ==================== SALES LIST RENDERING ====================
 function renderSalesList() {
     const tbody = document.getElementById("salesTableBody");
@@ -3099,6 +3822,8 @@ function exportData() {
         suppliers,
         bills,
         sales,
+        supplierPayments,
+        customMasterItems,
         shopName: "पूनम किराणा",
         exportDate: new Date().toISOString()
     };
@@ -3125,6 +3850,8 @@ function importData(event) {
                     suppliers = data.suppliers || [...DEFAULT_SUPPLIERS];
                     bills = data.bills || [];
                     sales = data.sales || [];
+                    supplierPayments = data.supplierPayments || [];
+                    customMasterItems = data.customMasterItems || [];
                     saveData();
                     populateSupplierDropdowns();
                     renderDashboard();
@@ -3146,6 +3873,7 @@ function clearAllData() {
         bills = [];
         sales = [];
         customMasterItems = [];
+        supplierPayments = [];
         supplierCatalog = {};
         saveData();
         populateSupplierDropdowns();
@@ -3323,6 +4051,12 @@ function handleCloudDataReceived(snapshot) {
         customMasterItems = [];
     }
 
+    if (cloudData.supplierPayments) {
+        supplierPayments = Array.isArray(cloudData.supplierPayments) ? cloudData.supplierPayments : Object.values(cloudData.supplierPayments);
+    } else {
+        supplierPayments = [];
+    }
+
     const cloudUpdatedAt = cloudData.updatedAt || Date.now();
 
     // Clean redundant photos in bills if any
@@ -3346,6 +4080,7 @@ function handleCloudDataReceived(snapshot) {
     localStorage.setItem(SALES_KEY, JSON.stringify(sales));
     localStorage.setItem(CATALOG_KEY, JSON.stringify(supplierCatalog));
     localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customMasterItems));
+    localStorage.setItem(SUPPLIER_PAYMENTS_KEY, JSON.stringify(supplierPayments));
     localStorage.setItem(CLOUD_UPDATED_AT_KEY, cloudUpdatedAt.toString());
 
     isApplyingCloudData = false;
@@ -3387,6 +4122,7 @@ function pushDataToCloud(force = false) {
         sales: sales || [],
         supplierCatalog: supplierCatalog || {},
         customMasterItems: customMasterItems || [],
+        supplierPayments: supplierPayments || [],
         updatedAt: now
     }).then(() => {
         isSyncingToCloud = false;

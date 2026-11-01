@@ -571,6 +571,45 @@ body {
 .stat-turnover .stat-icon { background: #e0f2fe; color: #0284c7; }
 .stat-profit .stat-icon { background: #dcfce7; color: #15803d; }
 .stat-potential .stat-icon { background: #ede9fe; color: #7c3aed; }
+.stat-dues .stat-icon { background: #fef2f2; color: #b91c1c; }
+
+.badge-due {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    display: inline-block;
+}
+.badge-paid {
+    background: #dcfce7;
+    color: #166534;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    display: inline-block;
+}
+.badge-partial {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.btn-stat-pill {
+    cursor: pointer;
+    transition: all 0.18s ease-in-out;
+    outline: none;
+    user-select: none;
+}
+.btn-stat-pill:active {
+    transform: scale(0.97);
+}
 
 .stat-info {
     display: flex;

@@ -6,7 +6,7 @@
     <title>🏪 पूनम किराणा - सप्लायर बिल व नफा व्यवस्थापन</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.3">
+    <link rel="stylesheet" href="style.css?v=2.6">
     <!-- Chart.js for 1 Year Monthly & Yearly Profit Report -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google Firebase SDK (Compat) for Real-time Mobile & Laptop Sync -->
@@ -36,9 +36,6 @@
                 <div id="loginError" class="error-msg" style="display:none;"></div>
                 <button type="submit" class="btn-login">लॉगिन करा 🔐</button>
             </form>
-            <div class="login-footer">
-                <p>Default: <strong>admin</strong> / <strong>kirana123</strong></p>
-            </div>
         </div>
     </div>
 
@@ -105,7 +102,7 @@
                     </div>
                 </div>
 
-                <!-- 4 MAIN STAT CARDS -->
+                <!-- 5 MAIN STAT CARDS -->
                 <div class="stats-grid">
                     <div class="stat-card stat-purchase">
                         <div class="stat-icon">📥</div>
@@ -129,6 +126,14 @@
                             <span class="stat-label">झालेला निव्वळ नफा (Profit)</span>
                             <span class="stat-value" id="dashTotalProfit">₹0</span>
                             <small class="stat-sub" id="dashNetMargin">0% मार्जिन</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-dues" onclick="showSection('suppliers')" style="cursor:pointer; border-left:4px solid #ef4444;" title="सप्लायर उधारी तपशील पहा">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <span class="stat-label">🔴 सप्लायरना देणे बाकी (Dues)</span>
+                            <span class="stat-value" id="dashTotalDues" style="color:#dc2626;">₹0</span>
+                            <small class="stat-sub" id="dashPendingSuppliersCount" style="color:#b91c1c;">0 सप्लायर्सचे देणे बाकी</small>
                         </div>
                     </div>
                     <div class="stat-card stat-potential">
@@ -190,20 +195,42 @@
                 <div class="section-header-row">
                     <div class="title-with-back">
                         <button class="btn-section-back" onclick="goBack()">⬅ मागे जा</button>
-                        <h2 class="section-title">👥 कायमचे सप्लायर्स व Excel रिपोर्ट</h2>
+                        <h2 class="section-title">👥 सप्लायर्स, उधारी व पेमेंट खातेवही</h2>
                     </div>
                     <div class="quick-actions">
-                        <button class="btn-quick btn-green" onclick="downloadAllSuppliersReportExcel()">📊 सर्व सप्लायर्स Excel रिपोर्ट 📥</button>
+                        <button class="btn-quick btn-green" onclick="openPaySupplierModal()" style="background:#16a34a;">💵 पेमेंट नोंदवा (Pay Supplier)</button>
+                        <button class="btn-quick" onclick="downloadAllSuppliersReportExcel()">📊 सर्व सप्लायर्स Excel 📥</button>
                         <button class="btn-quick" onclick="openAddSupplierModal()">➕ नवीन सप्लायर जोडा</button>
                     </div>
                 </div>
-                <p class="section-desc">प्रत्येक सप्लायरच्या कार्डवर <strong>'📊 Excel शीट'</strong> आणि <strong>'📄 CSV'</strong> दोन्ही पर्याय दिले आहेत. यातून <strong>व्यवस्थित बॉर्डर्स, फॉन्ट आणि रकाने असलेला सुंदर Excel रिपोर्ट</strong> डाऊनलोड होईल:</p>
+
+                <!-- SUPPLIERS SUMMARY ACCORDION / BANNER -->
+                <div class="calculation-card" style="margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; background:#fff; padding:16px 20px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:var(--shadow-sm);">
+                    <div style="flex:1; min-width:140px;">
+                        <span style="font-size:12.5px; color:#64748b; font-weight:600;">एकूण सप्लायर्स:</span>
+                        <div style="font-size:22px; font-weight:800; color:#0f172a;" id="suppSummaryCount">0</div>
+                    </div>
+                    <div style="flex:1; min-width:150px;">
+                        <span style="font-size:12.5px; color:#64748b; font-weight:600;">एकूण खरेदी बिल:</span>
+                        <div style="font-size:22px; font-weight:800; color:#dc2626;" id="suppSummaryTotalBuy">₹0</div>
+                    </div>
+                    <div style="flex:1; min-width:150px;">
+                        <span style="font-size:12.5px; color:#64748b; font-weight:600;">आतापर्यंत दिलेले पैसे:</span>
+                        <div style="font-size:22px; font-weight:800; color:#15803d;" id="suppSummaryTotalPaid">₹0</div>
+                    </div>
+                    <div style="flex:1; min-width:180px; background:#fef2f2; padding:8px 14px; border-radius:8px; border:1px solid #fecaca;">
+                        <span style="font-size:12.5px; color:#991b1b; font-weight:700;">🔴 एकूण देणे बाकी (Dues):</span>
+                        <div style="font-size:24px; font-weight:900; color:#b91c1c;" id="suppSummaryTotalDues">₹0</div>
+                    </div>
+                </div>
+
+                <p class="section-desc">प्रत्येक सप्लायरच्या कार्डवर <strong>'💵 पेमेंट द्या'</strong>, <strong>'📜 खातेवही (Passbook)'</strong> आणि <strong>'📊 Excel'</strong> पर्याय दिले आहेत. कोणाला किती देणे बाकी आहे हे लगेच तपासा:</p>
 
                 <!-- SUPPLIERS GRID / CARDS -->
                 <div class="suppliers-grid" id="suppliersGrid"></div>
 
                 <!-- SUPPLIER WISE PURCHASES TABLE -->
-                <h3 class="sub-title" style="margin-top:28px;">📊 सप्लायर-निहाय खरेदी व Excel रिपोर्ट ताळेबंद</h3>
+                <h3 class="sub-title" style="margin-top:28px;">📊 सप्लायर-निहाय खरेदी, दिलेले पैसे व देणे बाकी ताळेबंद</h3>
                 <div class="table-wrapper">
                     <table class="data-table">
                         <thead>
@@ -211,11 +238,11 @@
                                 <th>सप्लायर नाव</th>
                                 <th>मुख्य सेक्शन</th>
                                 <th>मोबाईल नंबर</th>
-                                <th>एकूण बिले संख्या</th>
-                                <th>एकूण खरेदी रक्कम (₹)</th>
-                                <th>विक्रीवर होणार रक्कम (₹)</th>
-                                <th>अपेक्षित नफा (₹)</th>
-                                <th>Excel / CSV डाउनलोड</th>
+                                <th>एकूण बिले</th>
+                                <th>एकूण खरेदी (₹)</th>
+                                <th>दिलेले पैसे (₹)</th>
+                                <th>देणे बाकी (₹)</th>
+                                <th>खातेवही / Excel</th>
                                 <th>कृती</th>
                             </tr>
                         </thead>
@@ -357,6 +384,63 @@
                         </div>
                     </div>
 
+                    <!-- PAYMENT STATUS & DUES BOX -->
+                    <div class="calculation-card" style="margin-top:14px; border:1.5px solid #cbd5e1; background:#f8fafc; padding:16px 20px; border-radius:10px;">
+                        <div style="font-weight:700; font-size:15px; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                            <span>💳 बिलाचे पेमेंट कसे केले? (Payment Status):</span>
+                        </div>
+
+                        <!-- 3 QUICK TOGGLE BUTTONS -->
+                        <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+                            <button type="button" id="btnBillStatusPaid" class="btn-stat-pill" onclick="setBillPaymentStatus('paid')" style="flex:1; min-width:140px; padding:10px 12px; border-radius:8px; border:2px solid #16a34a; background:#dcfce7; color:#15803d; font-weight:700; font-size:13.5px; cursor:pointer; transition:all 0.2s;">
+                                🟢 पूर्ण रोख दिले
+                            </button>
+                            <button type="button" id="btnBillStatusCredit" class="btn-stat-pill" onclick="setBillPaymentStatus('credit')" style="flex:1; min-width:140px; padding:10px 12px; border-radius:8px; border:2px solid #cbd5e1; background:#f8fafc; color:#64748b; font-weight:700; font-size:13.5px; cursor:pointer; transition:all 0.2s;">
+                                🔴 पूर्ण उधारी (बाकी)
+                            </button>
+                            <button type="button" id="btnBillStatusPartial" class="btn-stat-pill" onclick="setBillPaymentStatus('partial')" style="flex:1; min-width:140px; padding:10px 12px; border-radius:8px; border:2px solid #cbd5e1; background:#f8fafc; color:#64748b; font-weight:700; font-size:13.5px; cursor:pointer; transition:all 0.2s;">
+                                🟡 काही दिले + बाकी
+                            </button>
+                        </div>
+                        <input type="hidden" id="billPaymentStatus" value="paid">
+
+                        <!-- NOTICE WHEN CREDIT IS SELECTED -->
+                        <div id="billCreditNotice" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px; margin-bottom:12px; font-size:13.5px; color:#991b1b; line-height:1.5;">
+                            📌 <strong>पूर्ण उधारी निवडले आहे:</strong> या बिलाचे पैसे देणे बाकी राहतील. रोख पेमेंट दिले नसल्यामुळे पेमेंट पद्धत किंवा टीप टाकण्याची गरज नाही.
+                        </div>
+
+                        <div class="form-row" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+                            <div class="form-group" id="billPaidAmountGroup" style="flex:1; min-width:160px; margin-bottom:0; display:none;">
+                                <label style="font-weight:600; font-size:13px;">आता दिलेली रक्कम (₹)</label>
+                                <input type="number" id="billPaidAmount" min="0" step="0.01" placeholder="उदा. 5000" oninput="calculateBillPaymentBalance()" style="padding:10px; border-radius:6px; font-weight:700; color:#15803d;">
+                            </div>
+
+                            <div class="form-group" id="billPaymentModeGroup" style="flex:1; min-width:160px; margin-bottom:0;">
+                                <label style="font-weight:600; font-size:13px;">पेमेंट पद्धत</label>
+                                <select id="billPaymentMode" style="padding:10px; border-radius:6px;">
+                                    <option value="cash">रोख (Cash)</option>
+                                    <option value="upi">PhonePe / Google Pay / UPI</option>
+                                    <option value="bank">बँक ट्रान्सफर (NEFT/RTGS)</option>
+                                    <option value="cheque">चेक (Cheque)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="billPaymentNoteGroup" style="flex:1; min-width:180px; margin-bottom:0;">
+                                <label style="font-weight:600; font-size:13px;">पेमेंट टीप (पर्यायी)</label>
+                                <input type="text" id="billPaymentNote" placeholder="उदा. GPay ट्रान्झॅक्शन / रोख दिले" style="padding:10px; border-radius:6px;">
+                            </div>
+                        </div>
+
+                        <!-- LIVE PAYMENT BALANCE DISPLAY -->
+                        <div id="billPaymentSummaryBox" style="margin-top:12px; padding:10px 14px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; font-size:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <span>दिलेली रक्कम: </span><strong id="dispBillPaid" style="color:#15803d;">₹0.00</strong> &nbsp;|&nbsp; 
+                                <span>उरलेली देणे बाकी: </span><strong id="dispBillDue" style="color:#dc2626;">₹0.00</strong>
+                            </div>
+                            <span id="dispBillStatusBadge" class="badge-paid">हिशोब पूर्ण चुकता ✅</span>
+                        </div>
+                    </div>
+
                     <!-- SUBMIT ACTIONS -->
                     <div class="form-row two-col" style="margin-top:10px;">
                         <button type="submit" class="btn-add btn-green" style="font-size:16px; padding:14px;">
@@ -489,6 +573,11 @@
                         <option value="cleaning">🧹 साफसफाई</option>
                         <option value="personal">🧴 पर्सनल केअर</option>
                     </select>
+                    <select id="billPaymentFilter" onchange="renderBillsList()">
+                        <option value="all">सर्व पेमेंट्स (रोख + उधारी)</option>
+                        <option value="due">🔴 फक्त देणे बाकी (उधारी)</option>
+                        <option value="paid">🟢 फक्त पूर्ण रोख (Paid)</option>
+                    </select>
                 </div>
 
                 <!-- TABLE 1: INVOICES VIEW (GROUPED) -->
@@ -499,6 +588,7 @@
                                 <th>बिल तारीख</th>
                                 <th>सप्लायरचे नाव</th>
                                 <th>बिल क्रमांक</th>
+                                <th>पेमेंट स्थिती</th>
                                 <th>एकूण माल संख्या</th>
                                 <th>विभाग</th>
                                 <th>एकूण खरेदी बिल (₹)</th>
@@ -986,9 +1076,188 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL: PAY SUPPLIER ==================== -->
+    <div id="paySupplierModal" class="modal" style="display:none;" onclick="if(event.target === this) closePaySupplierModal()">
+        <div class="modal-content" style="max-width:500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="margin:0; font-size:18px; color:#166534;">💵 सप्लायरला पेमेंट नोंदवा (Pay Supplier)</h3>
+                <button class="close-sidebar" onclick="closePaySupplierModal()">✕</button>
+            </div>
+
+            <form id="paySupplierForm" onsubmit="return handleSaveSupplierPayment(event)">
+                <div class="form-group">
+                    <label>🏢 सप्लायर निवडा</label>
+                    <select id="paySupplierSelect" required onchange="onPaySupplierSelected()" style="font-weight:600; padding:10px;">
+                        <option value="">-- सप्लायर निवडा --</option>
+                    </select>
+                </div>
+
+                <!-- LIVE DUE ALERT -->
+                <div id="paySupplierDueAlert" style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#991b1b; font-weight:600;">सध्या देणे बाकी:</span>
+                    <strong id="paySupplierDueAmount" style="color:#b91c1c; font-size:17px;">₹0.00</strong>
+                </div>
+
+                <div class="form-row two-col" style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>📅 पेमेंट तारीख</label>
+                        <input type="date" id="paySupplierDate" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>💵 दिलेली रक्कम (₹)</label>
+                        <input type="number" id="paySupplierAmount" min="0.01" step="0.01" placeholder="उदा. 5000" required style="font-weight:700; color:#15803d; font-size:16px;">
+                    </div>
+                </div>
+
+                <div class="form-row two-col" style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>💳 पेमेंट पद्धत (Mode)</label>
+                        <select id="paySupplierMode" required>
+                            <option value="cash" selected>रोख (Cash)</option>
+                            <option value="upi">PhonePe / Google Pay / UPI</option>
+                            <option value="bank">बँक ट्रान्सफर (NEFT/RTGS)</option>
+                            <option value="cheque">चेक (Cheque)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>📝 संदर्भ / टीप (पर्यायी)</label>
+                        <input type="text" id="paySupplierNote" placeholder="उदा. GPay / चेक नं. / हफ्ता">
+                    </div>
+                </div>
+
+                <div class="form-row two-col" style="margin-top:10px; display:flex; gap:10px;">
+                    <button type="submit" class="btn-add btn-green" style="flex:1; padding:12px;">✅ पेमेंट जमा करा</button>
+                    <button type="button" class="btn-danger" onclick="closePaySupplierModal()" style="flex:1; padding:12px;">✕ रद्द करा</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: SUPPLIER LEDGER / PASSBOOK ==================== -->
+    <div id="supplierLedgerModal" class="modal" style="display:none;" onclick="if(event.target === this) closeSupplierLedgerModal()">
+        <div class="modal-content invoice-details-modal-content" style="max-width:920px;">
+            <div class="modal-header-with-actions">
+                <div>
+                    <h3 id="ledgerModalTitle" style="margin:0; font-size:19px; color:#1e3a8a;">📜 सप्लायर खातेवही (Supplier Ledger)</h3>
+                    <p id="ledgerModalSubtitle" style="margin:4px 0 0 0; font-size:13px; color:#64748b;"></p>
+                </div>
+                <button class="close-sidebar" onclick="closeSupplierLedgerModal()">✕</button>
+            </div>
+
+            <!-- LEDGER STATS SUMMARY -->
+            <div id="ledgerModalBanner" class="calculation-card" style="margin:12px 0; display:flex; flex-wrap:wrap; gap:14px; background:#f8fafc; padding:12px 16px; border-radius:10px; border:1px solid #e2e8f0;">
+                <div style="flex:1; min-width:140px;">
+                    <span style="font-size:12px; color:#64748b; font-weight:600;">एकूण खरेदी (Debit):</span>
+                    <div style="font-size:19px; font-weight:800; color:#dc2626;" id="ledgerTotalPurchase">₹0.00</div>
+                </div>
+                <div style="flex:1; min-width:140px;">
+                    <span style="font-size:12px; color:#64748b; font-weight:600;">एकूण दिलेले (Credit):</span>
+                    <div style="font-size:19px; font-weight:800; color:#15803d;" id="ledgerTotalPaid">₹0.00</div>
+                </div>
+                <div style="flex:1; min-width:160px; background:#fff; padding:6px 12px; border-radius:8px; border:1px solid #fecaca;">
+                    <span style="font-size:12px; color:#991b1b; font-weight:700;">🔴 शिल्लक देणे बाकी:</span>
+                    <div style="font-size:20px; font-weight:900; color:#b91c1c;" id="ledgerBalanceDue">₹0.00</div>
+                </div>
+            </div>
+
+            <!-- LEDGER STATEMENT TABLE -->
+            <div class="table-wrapper" style="max-height:48vh; overflow-y:auto; margin-bottom:14px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px; text-align:center;">#</th>
+                            <th style="width:95px; text-align:center;">तारीख</th>
+                            <th>प्रकार व तपशील</th>
+                            <th>संदर्भ / बिल नं.</th>
+                            <th style="text-align:right; color:#dc2626;">खरेदी (+)</th>
+                            <th style="text-align:right; color:#15803d;">जमा / दिलेले (-)</th>
+                            <th style="text-align:right;">शिल्लक बाकी (₹)</th>
+                            <th style="text-align:center;">कृती</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerModalItemsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="photo-modal-footer" style="margin-top:8px;">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-quick btn-green" id="ledgerPayNowBtn" onclick="">💵 नवीन पेमेंट नोंदवा</button>
+                    <button class="btn-quick" id="ledgerExcelBtn" onclick="" style="background:#0284c7;">📊 खातेवही Excel 📥</button>
+                </div>
+                <button class="btn-danger" onclick="closeSupplierLedgerModal()">बंद करा ✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: INVOICE PAYMENT STATUS ==================== -->
+    <div id="invoicePaymentModal" class="modal" style="display:none;" onclick="if(event.target === this) closeInvoicePaymentModal()">
+        <div class="modal-content" style="max-width:480px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="margin:0; font-size:18px; color:#1e3a8a;">💳 बिलाची पेमेंट स्थिती बदला</h3>
+                <button class="close-sidebar" onclick="closeInvoicePaymentModal()">✕</button>
+            </div>
+
+            <form id="invoicePaymentForm" onsubmit="return handleUpdateInvoicePaymentStatus(event)">
+                <input type="hidden" id="editInvKey">
+                
+                <div style="background:#f1f5f9; padding:12px; border-radius:8px; margin-bottom:14px; font-size:13.5px; line-height:1.6;">
+                    <div>सप्लायर: <strong id="editInvSupplier"></strong></div>
+                    <div>बिल नंबर: <strong id="editInvBillNum" style="color:#0284c7;"></strong></div>
+                    <div>तारीख: <strong id="editInvDate"></strong> | एकूण खरेदी बिल: <strong id="editInvTotalCost" style="color:#dc2626;"></strong></div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="font-weight:700; margin-bottom:8px; display:block; font-size:14px; color:#1e293b;">पेमेंट पर्याय निवडा:</label>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" id="btnEditStatusPaid" class="btn-stat-pill" onclick="setEditInvoiceStatus('paid')" style="flex:1; padding:11px 6px; border-radius:8px; border:2px solid #16a34a; background:#dcfce7; color:#15803d; font-weight:700; font-size:13.5px; cursor:pointer; transition:all 0.2s;">
+                            🟢 पूर्ण रोख
+                        </button>
+                        <button type="button" id="btnEditStatusCredit" class="btn-stat-pill" onclick="setEditInvoiceStatus('credit')" style="flex:1; padding:11px 6px; border-radius:8px; border:2px solid #cbd5e1; background:#f8fafc; color:#64748b; font-weight:700; font-size:13.5px; cursor:pointer; transition:all 0.2s;">
+                            🔴 पूर्ण उधारी
+                        </button>
+                        <button type="button" id="btnEditStatusPartial" class="btn-stat-pill" onclick="setEditInvoiceStatus('partial')" style="flex:1; padding:11px 6px; border-radius:8px; border:2px solid #cbd5e1; background:#f8fafc; color:#64748b; font-weight:700; font-size:13.5px; cursor:pointer; transition:all 0.2s;">
+                            🟡 अंशतः दिले
+                        </button>
+                    </div>
+                    <input type="hidden" id="editInvStatus" value="paid">
+                </div>
+
+                <!-- NOTICE WHEN CREDIT IS SELECTED -->
+                <div id="editInvCreditNotice" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:13.5px; color:#991b1b; line-height:1.5;">
+                    📌 <strong>पूर्ण उधारी नोंद:</strong> या बिलाचे पैसे देणे बाकी राहतील. रोख पेमेंट दिले नसल्यामुळे पेमेंट पद्धत किंवा टीप टाकण्याची गरज नाही.
+                </div>
+
+                <div class="form-group" id="editInvPaidGroup" style="display:none;">
+                    <label style="font-weight:600; font-size:13px;">दिलेली रक्कम (₹)</label>
+                    <input type="number" id="editInvPaidAmount" min="0" step="0.01" style="font-weight:700; color:#15803d; font-size:16px;">
+                </div>
+
+                <div class="form-group" id="editInvModeGroup">
+                    <label style="font-weight:600; font-size:13px;">पेमेंट पद्धत</label>
+                    <select id="editInvMode" style="padding:10px; border-radius:6px;">
+                        <option value="cash">रोख (Cash)</option>
+                        <option value="upi">PhonePe / Google Pay / UPI</option>
+                        <option value="bank">बँक ट्रान्सफर</option>
+                        <option value="cheque">चेक</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="editInvNoteGroup">
+                    <label style="font-weight:600; font-size:13px;">टीप (पर्यायी)</label>
+                    <input type="text" id="editInvNote" placeholder="उदा. रोख / GPay" style="padding:10px; border-radius:6px;">
+                </div>
+
+                <div class="form-row two-col" style="margin-top:10px; display:flex; gap:10px;">
+                    <button type="submit" class="btn-add btn-green" style="flex:1; padding:12px;">💾 सेव्ह करा</button>
+                    <button type="button" class="btn-danger" onclick="closeInvoicePaymentModal()" style="flex:1; padding:12px;">✕ रद्द करा</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATION -->
     <div id="toast" class="toast"></div>
 
-    <script src="app.js?v=2.3"></script>
+    <script src="app.js?v=2.6"></script>
 </body>
 </html>
